@@ -27,9 +27,9 @@ compile () {
 
 link () {
 
-	echo "Linking $3 as $2 using $1"
+	echo "Linking $2 as $3 using $1"
 
-	$1 -o $2 `ls $3`
+	$1 -o $3 `ls $2`
 
 }
 
@@ -54,7 +54,7 @@ options () {
 	else
 		compile c++ '*.cpp' '.o'
 
-		link c++ msg '*.o'
+		link c++ '*.o' msg
 
 		clean *.o
 	fi
