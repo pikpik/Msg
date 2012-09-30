@@ -164,7 +164,7 @@ void manageActivity ( int connection ) {
 
 void showUsage ( char *name ) {
 
-  fprintf ( stderr, "Usage: %s hostname port\n", name );
+  fprintf ( stderr, "Usage: %s host port\n", name );
 
   exit ( 0 );
 
