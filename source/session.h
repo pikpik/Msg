@@ -4,6 +4,8 @@
 
 void editMessage ( int connection, char * buffer );
 
+void showNewMessage ( char * inbox );
+
 void runLoop ( int connection );
 
 void session ( char * domain, int port );

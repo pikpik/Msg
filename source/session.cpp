@@ -8,55 +8,102 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netdb.h>
+#include <signal.h>
 
 #include "network.h"
+#include "signals.h"
 #include "session.h"
 
 
 using namespace std;
 
 
-void editMessage ( int connection, char * buffer ) {
+char outbox [ 256 ];
+
+
+void editMessage ( void ) {
 
   printf ( " > " );
 
-  bzero ( buffer, 256 );
+  bzero ( outbox, 256 );
 
-  fgets ( buffer, 255, stdin );
+  fgets ( outbox, 255, stdin );
 
-  sendMessage ( connection, buffer );
+  sendMessage ( outbox );
 
 }
 
 
-void runLoop ( int connection ) {
+void showNewMessage ( char * inbox ) {
 
-  // Separate buffers should probably be used
-  // for sending and receiving.
+  printf ( "%s", inbox );
 
-  char buffer [ 256 ];
+}
 
 
-  while ( true ) {
+void runLoop ( void ) {
+
+  // Use this to stop.
+
+  int waiting = 1;
+
+
+  // Make two sets of signals.
+
+  sigset_t listeningSignals, allSignals;
+
+
+  // Say which signals we're listening for.
+
+  sigemptyset ( & listeningSignals );
+
+  sigaddset ( & listeningSignals, SIGIO );
+
+  sigaddset ( & listeningSignals, SIGUSR1 );
+
+
+  // Begin the "critical section" by ignoring our signals until we're suspended.
+
+  sigprocmask ( SIG_BLOCK, & listeningSignals, & allSignals );
+
+
+  //memmove ( outbox, "GET /", 5 );
+  //sendMessage ( outbox );
+
+  editMessage ();
+
+
+  // Wait and respond to events.
+
+  while ( waiting ) {
 
     // Let the user write and send something.
 
-    editMessage ( connection, buffer );
+    //editMessage ();
 
 
     // Show what the server says in response.
 
-    while ( receiveMessage ( connection, buffer ) )
+    // http://en.wikibooks.org/wiki/Serial_Programming/termios
 
-      printf ( "%s\n", buffer );
+
+    // Ignore all other signals while we wait.
+    // The previously blocked signals are unblocked.
+
+    sigsuspend ( & allSignals );
 
   }
 
 
+  // This ends the "critical section" by listening to signals normally again.
+
+  sigprocmask ( SIG_UNBLOCK, & listeningSignals, NULL );
+
+
   // In the future, this should be done asynchronously.
+
   // When data's available, it should be displayed
   // and the interface should be redrawn.
-  // NCurses might help for that.
 
 }
 
@@ -65,17 +112,15 @@ void session ( char * domain, int port ) {
 
   // Start the connection to the server.
 
-  int connection = startConnection ( domain, port );
+  startConnection ( domain, port );
 
 
   // Later this might involve reading, writing, or interacting,
   // depending on what's specified.
 
-  runLoop ( connection );
+  runLoop ();
 
 
-  // For lack of a better way.
-
-  endConnection ( connection );
+  endConnection ();
 
 }

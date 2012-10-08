@@ -4,17 +4,23 @@
 #include <string.h>
 #include <netinet/in.h>
 #include <netdb.h>
+#include <sys/fcntl.h>
 
 #include "helpers.h"
+#include "signals.h"
+#include "session.h"
 #include "network.h"
 
 
 using namespace std;
 
 
-int startConnection ( char *serverAddress, int port ) {
+int connection;
 
-  int connection;
+char inbox [ 256 ];
+
+
+void startConnection ( char *serverAddress, int port ) {
 
   struct sockaddr_in serverIPAddress;
 
@@ -78,12 +84,21 @@ int startConnection ( char *serverAddress, int port ) {
     error ( "Unable to connect to the server." );
 
 
-  return connection;
+  // Let's read from the "file," or socket, asynchronously.
+
+  fcntl ( connection, F_SETOWN, ( int ) getpid ( ) );
+
+  fcntl ( connection, F_SETFL, FASYNC | O_NONBLOCK );
+
+
+  // Say that we'll listen for I/O messages (from the socket, hopefully).
+
+  responseForSignal ( newMessage, SIGIO );
 
 }
 
 
-void sendMessage ( int connection, char *buffer ) {
+void sendMessage ( char * buffer ) {
 
   int result = write ( connection, buffer, strlen ( buffer ) );
 
@@ -94,23 +109,34 @@ void sendMessage ( int connection, char *buffer ) {
 }
 
 
-int receiveMessage ( int connection, char *buffer ) {
+void newMessage ( int signal ) {
 
-  bzero ( buffer, 256 );
+  while ( receiveMessage () )
 
-  int result = read ( connection, buffer, 255 );
+    showNewMessage ( inbox );
 
+}
+
+
+int receiveMessage ( void ) {
+
+  bzero ( inbox, 256 );
+
+  int result = read ( connection, inbox, 255 );
+
+  /* Do we really need this anyway?
   if ( result < 0 )
 
-    cout << "Unable to listen for messages." << endl;
+    cout << "Unable to listen for messages (error code " << result << ")." << endl;
+  */
 
   return result;
 
 }
 
 
-int endConnection ( int connection ) {
+void endConnection ( void ) {
 
-  return close ( connection );
+  close ( connection );
 
 }

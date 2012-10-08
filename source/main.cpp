@@ -38,6 +38,9 @@ int main ( int argc, char * argv [] ) {
   session ( domain, port );
 
 
+  cout << "The End." << endl;
+
+
   return 0;
 
 }

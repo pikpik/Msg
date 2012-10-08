@@ -2,12 +2,14 @@
 
 # define network_h
 
-int startConnection ( char *serverAddress, int port );
+void startConnection ( char *serverAddress, int port );
 
-void sendMessage ( int connection, char *buffer );
+void sendMessage ( char * buffer );
 
-int receiveMessage ( int connection, char *buffer );
+void newMessage ( int signal );
 
-int endConnection ( int connection );
+int receiveMessage ( void );
+
+void endConnection ( void );
 
 #endif
