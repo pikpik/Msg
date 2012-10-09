@@ -111,26 +111,26 @@ void sendMessage ( char * buffer ) {
 
 void newMessage ( int signal ) {
 
-  while ( receiveMessage () )
+  int response;
+
+
+  while ( ( response = receiveMessage () ) > 0 )
 
     showNewMessage ( inbox );
+
+
+  if ( response == 0 )
+
+    waiting = 0;
 
 }
 
 
 int receiveMessage ( void ) {
 
-  bzero ( inbox, 256 );
+  memset ( & inbox, 0, sizeof inbox );
 
-  int result = read ( connection, inbox, 255 );
-
-  /* Do we really need this anyway?
-  if ( result < 0 )
-
-    cout << "Unable to listen for messages (error code " << result << ")." << endl;
-  */
-
-  return result;
+  return read ( connection, inbox, 255 );
 
 }
 

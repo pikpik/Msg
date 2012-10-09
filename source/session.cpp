@@ -21,6 +21,11 @@ using namespace std;
 char outbox [ 256 ];
 
 
+// Use this to stop.
+
+int waiting = 1;
+
+
 void editMessage ( void ) {
 
   printf ( " > " );
@@ -42,10 +47,6 @@ void showNewMessage ( char * inbox ) {
 
 
 void runLoop ( void ) {
-
-  // Use this to stop.
-
-  int waiting = 1;
 
 
   // Make two sets of signals.

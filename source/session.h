@@ -2,6 +2,8 @@
 
 # define session_h
 
+extern int waiting;
+
 void editMessage ( int connection, char * buffer );
 
 void showNewMessage ( char * inbox );
