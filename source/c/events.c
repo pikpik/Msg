@@ -1,10 +1,13 @@
 // Included header files
 
 #include "events.h"
+
 #include "helpers.h"
+#include "network.h"
+#include "terminal.h"
 
 
-// Globals
+// Global variables
 
 #define listenerLimit	255
 
@@ -33,9 +36,16 @@ typedef struct {
 listenerStructure listeners [ listenerLimit ];
 
 
+// Use this to stop.
+
+int waitingToQuit = 1;
+
+
 // Functions
 
 void awaken ( void ) {
+	
+	debug();
 	
 	FD_ZERO ( & listeningToRead );
 	
@@ -47,6 +57,8 @@ void awaken ( void ) {
 
 
 void when ( int file, int events, void ( * action ) ) {
+	
+	//printf("when\n");
 	
 	listeners [ numberOfListeners ].file = file;
 	
@@ -73,6 +85,8 @@ void when ( int file, int events, void ( * action ) ) {
 
 void recognize ( int i ) {
 	
+	//printf("recognize\n");
+	
 	int events = 0;
 	
 	
@@ -98,13 +112,15 @@ void recognize ( int i ) {
 
 int getHighestFileDescriptor ( void ) {
 	
+	//printf("getHighestFileDescriptor\n");
+	
 	int highest = -1;
 	
 	for ( int i = 0; i < numberOfListeners; i++ )
 		
 		if ( listeners [ i ].file > highest )
 			
-			highest = listeners [ highest ].file;
+			highest = listeners [ i ].file;
 	
 	return ( highest > -1 ) ? highest + 1 : -1;
 	
@@ -113,12 +129,15 @@ int getHighestFileDescriptor ( void ) {
 
 int waiting ( void ) {
 	
+	debug();
+	
+	
 	listenersAreReadable = listeningToRead;
 	
 	listenersAreWritable = listeningToWrite;
 	
 	listenersAreFailed = listeningForError;
-	
+
 	
 	int result = select (
 		getHighestFileDescriptor (),
@@ -130,7 +149,7 @@ int waiting ( void ) {
 	
 	if ( 0 > result )
 		
-		error ( NULL );
+		error ( __FILE__ );
 	
 	
 	for (
@@ -149,7 +168,64 @@ int waiting ( void ) {
 
 void listenAndRespond ( void ) {
 	
-	while ( waiting () );
+	//printf("listenAndRespond\n");
+	
+	while ( waiting () && waitingToQuit );
+	
+}
+
+
+void signUpListeners ( void ) {
+	
+	debug();
+	
+	awaken ();
+	
+	when (
+		  STDIN_FILENO,
+		  EventReadable | EventFailed,
+		  & onKeyPress
+		  );
+	
+}
+
+
+void runLoop ( int connection ) {
+	
+	debug();
+	
+	//printf("runLoop");
+	
+	enableCharacterBreakMode ( STDIN_FILENO );
+	
+	listenAndRespond ();
+	
+	restoreTerminal ( STDIN_FILENO );
+	
+	// In the future, this should be done asynchronously.
+	
+	// When data's available, it should be displayed
+	// and the interface should be redrawn.
+	
+}
+
+
+int chatWithProtocolToServer ( int connection, int protocol ) {
+	
+	debug();
+	
+	signUpListeners ();
+	
+	// Later this might involve reading, writing, or interacting,
+	// depending on what's specified.
+	
+	runLoop ( connection );
+	
+	close ( connection );
+	
+	// There were no errors.
+	
+	return true;
 	
 }
 

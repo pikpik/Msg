@@ -1,105 +1,153 @@
 // Included things
 
-#include "events.h"
-#include "terminal.h"
+#include "main.h"
+
 #include "helpers.h"
-
-
-// Functions
-
-/* void onKeyPress ( int fileNumber, int event ) {
-	
-	if ( event & EventReadable ) {
-		
-		char buffer [ 1 ];
-		
-		read ( fileNumber, buffer, 1 );
-		
-		printf ( "A key was pressed! (%s)\n", buffer );
-		
-	}
-	
-	if ( event & EventFailed )
-		
-		error ( "I had a problem while waiting for keys to be pressed!\n" );
-	
-}
-
-
-void aardvark ( int fileNumber, int event ) {
-	
-	printf ( "Hello!\n" );
-	
-} */
-
-
-void onKeyPress ( int fileNumber, int event ) {
-	
-	if ( event & EventReadable ) {
-		
-		
-		char character = getchar ();
-		
-		
-		if ( character == '\n' )
-			
-			printf ( "\t(Hello!)\n" );
-		
-		else
-			
-			putchar ( character );
-		
-		
-		if ( fflush ( stdout ) != 0 )
-			
-			error ( NULL );
-		
-	}
-	
-	if ( event & EventFailed )
-		
-		error ( "I had a problem while waiting for keys to be pressed!\n" );
-	
-}
-
-
-void signUpListeners () {
-	
-	/* when (
-		STDIN_FILENO,
-		EventReadable | EventFailed,
-		& onKeyPress
-	);
-	
-	when (
-		STDIN_FILENO,
-		EventReadable,
-		& aardvark
-	); */
-	
-	when (
-		STDIN_FILENO,
-		EventReadable | EventFailed,
-		& onKeyPress
-	);
-	
-}
+#include "network.h"
+#include "events.h"
 
 
 // Begin
 
-int main ( void ) {
+int main ( int argc, char * argv [] ) {
 	
-	awaken ();
+	// To see the path:
 	
-	signUpListeners ();
+	// Set debugging to true in helpers.h,
+	// run build.sh,
+	// and run the program again.
 	
-	enableCharacterBreakMode ( STDIN_FILENO );
+	debug();
 	
-	listenAndRespond ();
 	
-	restoreTerminal ( STDIN_FILENO );
+	// What are we supposed to do?
 	
-	return false;
+	int protocol;
+	
+	char * domain;
+	
+	int port;
+	
+	
+	if ( argc >= 2 )
+		
+		protocol = useProtocolOption ( argv [ 1 ] );
+		
+	else
+		
+		help ();
+	
+	
+	if ( argc >= 3 )
+		
+		domain = useDomainOption ( argv [ 2 ] );
+		
+	else
+		
+		help ();
+	
+	
+	if ( argc >= 4 )
+		
+		port = usePortOption ( argv [ 3 ] );
+		
+	else
+		
+		help ();
+	
+	
+	chatWithProtocolToServer (
+		
+		protocol,
+		
+		openConnection ( domain, port )
+		
+	);
+	
+	return 0;
+	
+}
+
+
+// Functions
+
+int useProtocolOption ( char * protocolOption ) {
+	
+	debug();
+	
+	
+	// Do we recognize the option?
+	
+	if ( strcmp ( protocolOption, "irc" ) == 0 ) {
+		
+		// Later, this should return a struct of named functions for actions.
+		
+		return true;
+		
+	}
+	
+	
+	warning (
+			 
+			 "\n"
+			 "Unknown protocol.\n"
+			 "\n"
+			 "Try: irc\n"
+			 
+			 );
+	
+	help ();
+	
+}
+
+
+char * useDomainOption ( char * domainOption ) {
+	
+	if ( strlen ( domainOption ) < 4 ) {
+		
+		warning (
+				 
+				 "\n"
+				 "Unknown domain.\n"
+				 "\n"
+				 "Try: irc.freenode.net\n"
+				 
+				 );
+		
+		help ();
+		
+	}
+	
+	return limitStringLength ( domainOption, 255 );
+	
+}
+
+
+int usePortOption ( char * portOption ) {
+	
+	debug();
+	
+	int port = atoi ( portOption );
+	
+	// Switch to strtol?
+	
+	if ( port >= 0 ) {
+		
+		return port;
+		
+	} else {
+		
+		warning (
+				 
+				 "\n"
+				 "Not a port.\n"
+				 "\n"
+				 "Try: 6667\n"
+				 
+				 );
+		
+		help ();
+		
+	}
 	
 }

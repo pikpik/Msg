@@ -1,10 +1,11 @@
 // Included header files
 
 #include "terminal.h"
+
 #include "helpers.h"
+#include "events.h"
+#include "interface.h"
 
-
-// Functions
 
 /*
  Source	StackOverflow
@@ -13,18 +14,32 @@
  Editor	Tim Cooper - http://stackoverflow.com/users/142162/tim-cooper
  */
 
+
+// Functions
+
+char input [ 256 ];
+
 static struct termios newterm;
+
 static struct termios originalterm;
 
+
+// Functions
+
 void enableCharacterBreakMode ( int fd ) {
+	
+	debug();
 	
 	if ( tcgetattr ( fd, & originalterm ) == -1 )
 		
 		error ( NULL );
 	
 	newterm = originalterm;
+	
 	newterm.c_lflag = newterm.c_lflag & ~ ( ECHO | ICANON );
+	
 	newterm.c_cc [ VMIN ] = 1;
+	
 	newterm.c_cc [ VTIME ] = 0;
 	
 	if ( tcsetattr ( fd, TCSAFLUSH, & newterm ) == -1 )
@@ -33,7 +48,10 @@ void enableCharacterBreakMode ( int fd ) {
 	
 }
 
+
 void restoreTerminal ( int fd ) {
+	
+	debug();
 	
 	if ( tcsetattr ( fd, TCSANOW, & originalterm ) == -1 )
 		
@@ -41,7 +59,10 @@ void restoreTerminal ( int fd ) {
 	
 }
 
+
 int getch () {
+	
+	debug();
 	
 	int cinput;
 	
@@ -52,5 +73,67 @@ int getch () {
 	restoreTerminal ( STDIN_FILENO );
 	
 	return cinput;
+	
+}
+
+
+void interpretKey ( char character ) {
+	
+	debug();
+	
+	//printf ( "Is there anything in Input? %d\n", strlen ( input ) );
+	
+	if ( strlen ( input ) > 0 ) {
+		
+		//printf ( "Character: %c\n", character );
+		fflush (stdout);
+		
+		//printf ( "Input, pre: %d\n", strlen ( input ) );
+		appendCharacterToStringToLimit ( character, input, 255 );
+		//printf ( "Input, post: %d\n", strlen ( input ) );
+		
+		editMessageLine ();
+		
+	} else {
+		
+		if ( (int) character == escapeKeyInteger ) {
+			
+			// It could be the beginning of an ANSI escape sequence.
+			
+			// We'll check later characters for line-editing commands.
+			
+			strcpy ( input, escapeKeyString );
+			
+		} else if ( character == enterKeyCharacter ) {
+			
+			interpretCommand ();
+			
+		} else {
+			
+			// It's probably an ordinary character the user typed.
+			
+			appendCharacterToStringToLimit ( character, message, 255 );
+			
+			updateMessageLine ();
+			
+		}
+		
+	}
+}
+
+
+void onKeyPress ( int fileNumber, int event ) {
+	
+	debug();
+	
+	if ( event & EventReadable ) {
+		
+		interpretKey ( getchar () );
+		
+	}
+	
+	if ( event & EventFailed )
+		
+		error ( "I had a problem while waiting for keys to be pressed!\n" );
 	
 }

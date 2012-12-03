@@ -9,12 +9,10 @@
 
 // Functions
 
-void startConnection ( char *serverAddress, int port );
+int openConnection ( char * domain, int port );
 
-void sendMessage ( char * buffer );
+void sendMessage ( int connection, char * buffer );
 
-void newMessage ( int signal );
+void newMessage ( int connection, int events );
 
-int receiveMessage ( void );
-
-void endConnection ( void );
+int receiveMessage ( int connection );

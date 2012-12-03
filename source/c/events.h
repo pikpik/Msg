@@ -6,15 +6,23 @@
 #include <unistd.h>
 #include <stdlib.h>
 
+#include <string.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <netdb.h>
+#include <signal.h>
 
-// Global variables
 
-#define true			1
-#define false			0
+// Definitions
 
 #define EventReadable	( 1 << 1 )
 #define EventWritable	( 1 << 2 )
 #define EventFailed		( 1 << 3 )
+
+
+// Global variables
+
+extern int waitingToQuit;
 
 
 // Functions
@@ -30,3 +38,9 @@ int getHighestFileDescriptor ( void );
 int waiting ( void );
 
 void listenAndRespond ( void );
+
+void runLoop ( int connection );
+
+int chatWithProtocolToServer ( int connection, int protocol );
+
+void signUpListeners ( void );
