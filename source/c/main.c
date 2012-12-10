@@ -11,58 +11,35 @@
 
 int main ( int argc, char * argv [] ) {
 	
-	// To see the path:
-	
-	// Set debugging to true in helpers.h,
-	// run build.sh,
-	// and run the program again.
-	
 	debug();
 	
+	char protocol [ 256 ];
 	
-	// What are we supposed to do?
-	
-	int protocol;
-	
-	char * domain;
+	char domain [ 256 ];
 	
 	int port;
 	
 	
-	if ( argc >= 2 )
-		
-		protocol = useProtocolOption ( argv [ 1 ] );
-		
-	else
-		
-		help ();
+	// What are we supposed to do?
 	
+	if ( ! (
+		
+		argc >= 2 && useProtocolOption ( argv [ 1 ], protocol ) &&
+		
+		argc >= 3 && useDomainOption ( argv [ 2 ], domain ) &&
+		
+		argc >= 4 && usePortOption ( argv [ 3 ], & port ) &&
+		
+		chatWithProtocolToServer (
+			
+			protocol,
+			
+			openConnection ( domain, port )
+			
+		)
+		
+	) ) help ();
 	
-	if ( argc >= 3 )
-		
-		domain = useDomainOption ( argv [ 2 ] );
-		
-	else
-		
-		help ();
-	
-	
-	if ( argc >= 4 )
-		
-		port = usePortOption ( argv [ 3 ] );
-		
-	else
-		
-		help ();
-	
-	
-	chatWithProtocolToServer (
-		
-		protocol,
-		
-		openConnection ( domain, port )
-		
-	);
 	
 	return 0;
 	
@@ -71,83 +48,87 @@ int main ( int argc, char * argv [] ) {
 
 // Functions
 
-int useProtocolOption ( char * protocolOption ) {
+int useProtocolOption ( char * protocolOption, char * protocol ) {
 	
 	debug();
 	
+	// Later, this should return a struct(ure) of named functions for actions.
 	
-	// Do we recognize the option?
-	
-	if ( strcmp ( protocolOption, "irc" ) == 0 ) {
+	if (
 		
-		// Later, this should return a struct of named functions for actions.
+		strcmp ( protocolOption, "irc" ) == 0 &&
+		
+		copyStringLengthIntoString ( protocolOption, 255, protocol )
+		
+	)	return true;
+	
+	warning (
+		
+		"\n"
+		"Unknown protocol.\n"
+		"\n"
+		"Try: irc\n"
+		
+	);
+	
+	return false;
+	
+}
+
+
+int useDomainOption ( char * domainOption, char * domain ) {
+	
+	debug();
+	
+	if (
+		
+		strlen ( domainOption ) > 3 &&
+		
+		copyStringLengthIntoString ( domainOption, 255, domain )
+		
+	)	return true;
+	
+	warning (
+		
+		"\n"
+		"Unknown domain.\n"
+		"\n"
+		"Try: irc.freenode.net\n"
+		
+	);
+	
+	return false;
+	
+}
+
+
+int usePortOption ( char * portOption, int * port ) {
+	
+	debug();
+	
+	// Switch to strtol?
+	
+	int testNumberOfPort = atoi ( portOption );
+	
+	if ( port >= 0 ) {
+		
+		// Copy the new number to port's address.
+		
+		* port = testNumberOfPort;
 		
 		return true;
 		
 	}
 	
-	
 	warning (
-			 
-			 "\n"
-			 "Unknown protocol.\n"
-			 "\n"
-			 "Try: irc\n"
-			 
-			 );
-	
-	help ();
-	
-}
-
-
-char * useDomainOption ( char * domainOption ) {
-	
-	if ( strlen ( domainOption ) < 4 ) {
 		
-		warning (
-				 
-				 "\n"
-				 "Unknown domain.\n"
-				 "\n"
-				 "Try: irc.freenode.net\n"
-				 
-				 );
+		"\n"
+		"Not a port.\n"
+		"\n"
+		"Try: 6667\n"
 		
-		help ();
-		
-	}
+	);
 	
-	return limitStringLength ( domainOption, 255 );
-	
-}
-
-
-int usePortOption ( char * portOption ) {
-	
-	debug();
-	
-	int port = atoi ( portOption );
-	
-	// Switch to strtol?
-	
-	if ( port >= 0 ) {
-		
-		return port;
-		
-	} else {
-		
-		warning (
-				 
-				 "\n"
-				 "Not a port.\n"
-				 "\n"
-				 "Try: 6667\n"
-				 
-				 );
-		
-		help ();
-		
-	}
+	return false;
 	
 }

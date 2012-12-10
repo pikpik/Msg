@@ -58,7 +58,7 @@ void awaken ( void ) {
 
 void when ( int file, int events, void ( * action ) ) {
 	
-	//printf("when\n");
+	debug();
 	
 	listeners [ numberOfListeners ].file = file;
 	
@@ -85,7 +85,7 @@ void when ( int file, int events, void ( * action ) ) {
 
 void recognize ( int i ) {
 	
-	//printf("recognize\n");
+	debug();
 	
 	int events = 0;
 	
@@ -112,7 +112,7 @@ void recognize ( int i ) {
 
 int getHighestFileDescriptor ( void ) {
 	
-	//printf("getHighestFileDescriptor\n");
+	debug();
 	
 	int highest = -1;
 	
@@ -131,7 +131,6 @@ int waiting ( void ) {
 	
 	debug();
 	
-	
 	listenersAreReadable = listeningToRead;
 	
 	listenersAreWritable = listeningToWrite;
@@ -140,11 +139,17 @@ int waiting ( void ) {
 
 	
 	int result = select (
+		
 		getHighestFileDescriptor (),
+		
 		& listenersAreReadable,
+		
 		& listenersAreWritable,
+		
 		& listenersAreFailed,
+		
 		NULL
+		
 	);
 	
 	if ( 0 > result )
@@ -166,26 +171,19 @@ int waiting ( void ) {
 }
 
 
-void listenAndRespond ( void ) {
-	
-	//printf("listenAndRespond\n");
-	
-	while ( waiting () && waitingToQuit );
-	
-}
-
-
 void signUpListeners ( void ) {
 	
 	debug();
 	
-	awaken ();
-	
 	when (
+		  
 		  STDIN_FILENO,
+		  
 		  EventReadable | EventFailed,
+		  
 		  & onKeyPress
-		  );
+		  
+	);
 	
 }
 
@@ -194,36 +192,26 @@ void runLoop ( int connection ) {
 	
 	debug();
 	
-	//printf("runLoop");
-	
-	enableCharacterBreakMode ( STDIN_FILENO );
-	
-	listenAndRespond ();
-	
-	restoreTerminal ( STDIN_FILENO );
-	
-	// In the future, this should be done asynchronously.
-	
-	// When data's available, it should be displayed
-	// and the interface should be redrawn.
+	while ( waitingToQuit && waiting () );
 	
 }
 
 
-int chatWithProtocolToServer ( int connection, int protocol ) {
+int chatWithProtocolToServer ( char * protocol, int connection ) {
 	
 	debug();
 	
+	awaken ();
+	
 	signUpListeners ();
 	
-	// Later this might involve reading, writing, or interacting,
-	// depending on what's specified.
+	enableCharacterBreakMode ( STDIN_FILENO );
 	
 	runLoop ( connection );
 	
-	close ( connection );
+	restoreTerminal ( STDIN_FILENO );
 	
-	// There were no errors.
+	close ( connection );
 	
 	return true;
 	

@@ -2,4 +2,4 @@
 
 set -e -x
 
-cc -std=c99 -o simple *.c
+cc -std=c99 -o msg *.c

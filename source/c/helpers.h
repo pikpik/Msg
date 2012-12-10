@@ -9,12 +9,15 @@
 // Global things
 
 #define appName			"msg"
+
 #define true			1
+
 #define false			0
+
 #define debugging		false
 
 #if debugging == true
-#	define debug() printf ( "%s:%s:%d\n", __FILE__, __func__, __LINE__ );
+#	define debug() printf ( "%s:%s:%d\n", __FILE__, __func__, __LINE__ ); fflush ( stdout ) ;
 #else
 #	define debug()
 #endif
@@ -35,5 +38,7 @@ int appendCharacterToStringToLimit ( char suffixCharacter, char * baseString, in
 int copyStringLengthIntoString ( char * source, int length, char * destination );
 
 char * limitStringLength ( char * originalString, int length );
+
+void clearString ( char * string );
 
 void introspectString ( char * string );

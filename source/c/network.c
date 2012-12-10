@@ -20,7 +20,6 @@ int openConnection ( char * domain, int port ) {
 	
 	debug();
 	
-	
 	struct sockaddr_in serverIPAddress;
 	
 	struct hostent * server;
@@ -115,6 +114,8 @@ void newMessage ( int connection, int events ) {
 	debug();
 	
 	if ( events & EventReadable ) {
+		
+		debug();
 		
 		int response;
 		

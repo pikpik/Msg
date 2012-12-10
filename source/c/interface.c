@@ -12,7 +12,7 @@
 
 char message [ 256 ];
 
-int caretPosition = 0;
+int caretPosition = 1;
 
 int updateMessageLineTimes = 0;
 
@@ -40,16 +40,15 @@ void updateMessageLine ( void ) {
 	
 	clearMessageLine ();
 	
+	
 	// Put what the user's writing on the screen.
 	
+	moveCaretToPosition ( 0 );
+	
 	printf ( "%s", message );
-	//printf ( "%s" "%d", message, ++updateMessageLineTimes );
 	
+	moveCaretToPosition ( caretPosition );
 	
-	
-	// Move the cursor/caret into position.
-	
-	//printf ( "%c[%dG", escapeKeyCharacter, caretPosition );
 	
 	// Make sure things get sent to the terminal.
 	
@@ -60,17 +59,22 @@ void updateMessageLine ( void ) {
 }
 
 
+void moveCaretToPosition ( int position ) {
+	
+	debug();
+	
+	printf ( "%c[%dG", escapeKeyCharacter, position );
+	
+}
+
+
 void moveCaretForward ( void ) {
 	
 	debug();
 	
-	printf("Yo!");
-	
 	// We let the caret go a character further than the text.
 	
-	if ( ( strlen ( message ) + 1 >= caretPosition ) && ( caretPosition < sizeof message ) ) caretPosition++;
-	
-	//strcpy ( message, "forward" );
+	if ( caretPosition < strlen ( message ) + 1 ) caretPosition++;
 	
 	updateMessageLine ();
 	
@@ -81,9 +85,7 @@ void moveCaretBackward ( void ) {
 	
 	debug();
 	
-	caretPosition = ( 0 >= caretPosition ) ? 0 : caretPosition - 1;
-	
-	//strcpy ( message, "backward" );
+	caretPosition = ( caretPosition <= 0 ) ? 0 : caretPosition - 1;
 	
 	updateMessageLine ();
 	
@@ -94,41 +96,23 @@ void editMessageLine ( void ) {
 	
 	debug();
 	
-	// So helpful: http://en.wikipedia.org/wiki/ANSI_escape_sequences
-	
 	if ( input [ 0 ] == escapeKeyCharacter ) {
-		
-		debug();
-		
-		//introspectString ( input );
-		//introspectString ( leftArrowKeyString );
-		//introspectString ( cursorBackwardKeyString );
-		//introspectString ( rightArrowKeyString );
-		//introspectString ( cursorForwardKeyString );
 		
 		if ( strcmp ( input, leftArrowKeyString ) == 0 || strcmp ( input, cursorBackwardKeyString ) == 0 ) {
 			
-			debug();
-			
-			strcpy ( input, "" );
+			clearString ( input );
 			
 			moveCaretBackward ();
 			
 		} else if ( strcmp ( input, rightArrowKeyString ) == 0 || strcmp ( input, cursorForwardKeyString ) == 0 ) {
 			
-			debug();
-			
-			strcpy ( input, "" );
+			clearString ( input );
 			
 			moveCaretForward ();
 				
 		} else {
 			
-			debug();
-			
 			if ( strlen ( input ) > 2 ) {
-				
-				debug();
 				
 				strcpy ( input, "" );
 				
@@ -153,9 +137,9 @@ void interpretCommand () {
 		
 		printf ( "A command!" );
 		
-		strcpy ( message, "" );
+		clearString ( message );
 		
-		caretPosition = 0;
+		caretPosition = 1;
 		
 		updateMessageLine ();
 		
@@ -163,13 +147,13 @@ void interpretCommand () {
 		
 		// Send the message.
 		
-		printf ( "%s\n", message );
-		
-		strcpy ( message, "" );
-		
-		caretPosition = 0;
+		caretPosition = 1;
 		
 		updateMessageLine ();
+		
+		clearString ( message );
+		
+		printf ( "\n" );
 		
 	}
 	

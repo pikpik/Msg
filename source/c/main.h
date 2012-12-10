@@ -5,8 +5,8 @@
 
 // Functions
 
-int useProtocolOption ( char * protocolOption );
+int useProtocolOption ( char * protocolOption, char * protocol );
 
-char * useDomainOption ( char * domainOption );
+int useDomainOption ( char * domainOption, char * domain );
 
-int usePortOption ( char * portOption );
+int usePortOption ( char * portOption, int * port );

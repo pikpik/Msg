@@ -81,16 +81,11 @@ void interpretKey ( char character ) {
 	
 	debug();
 	
-	//printf ( "Is there anything in Input? %d\n", strlen ( input ) );
-	
 	if ( strlen ( input ) > 0 ) {
 		
-		//printf ( "Character: %c\n", character );
-		fflush (stdout);
+		fflush ( stdout );
 		
-		//printf ( "Input, pre: %d\n", strlen ( input ) );
 		appendCharacterToStringToLimit ( character, input, 255 );
-		//printf ( "Input, post: %d\n", strlen ( input ) );
 		
 		editMessageLine ();
 		
@@ -114,7 +109,7 @@ void interpretKey ( char character ) {
 			
 			appendCharacterToStringToLimit ( character, message, 255 );
 			
-			updateMessageLine ();
+			moveCaretForward ();
 			
 		}
 		

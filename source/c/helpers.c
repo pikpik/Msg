@@ -14,7 +14,13 @@ void help ( void ) {
 		stdout,
 		
 		"\n"
-		"Usage: " appName " <protocol> <server> <port>\n"
+		"  Usage: " appName " <protocol> <server> <port>\n"
+		"\n"
+		"  protocols: irc\n"
+		"\n"
+		"     server: irc.freenode.net\n"
+		"\n"
+		"       port: 6667\n"
 		"\n"
 		
 	);
@@ -25,6 +31,8 @@ void help ( void ) {
 
 
 void warning ( const char * message ) {
+	
+	debug();
 	
 	if ( errno )
 		
@@ -39,6 +47,8 @@ void warning ( const char * message ) {
 
 void error ( const char * message ) {
 	
+	debug();
+	
 	warning ( ( message ) ? message : NULL );
 	
 	exit ( 1 );
@@ -48,6 +58,8 @@ void error ( const char * message ) {
 
 int appendStringToStringToLimit ( char * suffix, char * base, int lengthLimit ) {
 	
+	debug();
+	
 	strncat ( base, suffix, lengthLimit );
 	
 	return true;
@@ -56,6 +68,8 @@ int appendStringToStringToLimit ( char * suffix, char * base, int lengthLimit ) 
 
 
 int appendCharacterToStringToLimit ( char suffixCharacter, char * baseString, int lengthLimit ) {
+	
+	debug();
 	
 	char convertedCharacter [ 1 ];
 	
@@ -73,15 +87,23 @@ int copyStringLengthIntoString ( char * source, int length, char * destination )
 	debug();
 	
 	memset (
+		
 		destination,
+		
 		'\0',
+		
 		sizeof ( destination )
+		
 	);
 	
 	strncpy (
+		
 		destination,
+		
 		source,
+		
 		length - 1
+		
 	);
 	
 	return true;
@@ -91,6 +113,8 @@ int copyStringLengthIntoString ( char * source, int length, char * destination )
 
 char * limitStringLength ( char * originalString, int length ) {
 	
+	debug();
+	
 	// Add one byte for the null ending.
 	
 	int newStringLength = length + 1;
@@ -98,15 +122,23 @@ char * limitStringLength ( char * originalString, int length ) {
 	char * newString = malloc ( newStringLength * sizeof ( char ) );
 	
 	memset (
+		
 		newString,
+		
 		'\0',
+		
 		sizeof ( newString )
+		
 	);
 	
 	strncpy (
+		
 		newString,
+		
 		originalString,
+		
 		newStringLength
+		
 	);
 	
 	return newString;
@@ -114,11 +146,26 @@ char * limitStringLength ( char * originalString, int length ) {
 }
 
 
+void clearString ( char * string ) {
+	
+	debug();
+	
+	strcpy ( string, "" );
+	
+}
+
+
 void introspectString ( char * string ) {
+	
+	debug();
 	
 	for ( int i = 0; i < strlen ( string ); i++ )
 		
-		printf ( " %c (%d);", string [ i ], string [ i ] );
+		printf (
+			" %c (%d);",
+			string [ i ],
+			string [ i ]
+		);
 	
 	printf ( "\n" );
 	

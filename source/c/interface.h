@@ -38,6 +38,8 @@ void clearMessageLine ( void );
 
 void updateMessageLine ( void );
 
+void moveCaretToPosition ( int position );
+
 void moveCaretForward ( void );
 
 void moveCaretBackward ( void );
