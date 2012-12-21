@@ -6,20 +6,45 @@
 #include <string.h>
 
 
-// Global things
+// Definitions
 
-#define appName			"msg"
+#define appName					"msg"
 
-#define true			1
+#define true					1
 
-#define false			0
+#define false					0
 
-#define debugging		false
+#define debugging				false
+
+#define enterKeyString			"\n"
+#define escapeKeyString			"\033"
+#define deleteKeyString			"\177"
+#define escapeKeyString			"\033"
+
+#define ANSICSIString			escapeKeyString "["
+
+#define leftArrowKeyString		ANSICSIString "D"
+#define rightArrowKeyString		ANSICSIString "C"
+#define cursorBackwardKeyString	ANSICSIString "1D"
+#define cursorForwardKeyString	ANSICSIString "1C"
+#define clearLineString			ANSICSIString "2K"
+
+// See:
+//		http://en.wikipedia.org/wiki/ANSI_escape_sequences
+//		http://en.wikipedia.org/wiki/ASCII
+//		http://pubs.opengroup.org/onlinepubs/9699919799/basedefs/V1_chap06.html
+
+
+// Macros
 
 #if debugging == true
-#	define debug() printf ( "%s:%s:%d\n", __FILE__, __func__, __LINE__ ); fflush ( stdout ) ;
+
+#	define debug() printf ( "%s:%s:%d\n", __FILE__, __func__, __LINE__ ); fflush ( stdout );
+
 #else
+
 #	define debug()
+
 #endif
 
 
@@ -37,8 +62,12 @@ int appendCharacterToStringToLimit ( char suffixCharacter, char * baseString, in
 
 int copyStringLengthIntoString ( char * source, int length, char * destination );
 
+int insertStringAtPositionInStringToLimit ( char * source, int destinationPosition, char * destination, int lengthLimit );
+
 char * limitStringLength ( char * originalString, int length );
 
 void clearString ( char * string );
 
 void introspectString ( char * string );
+
+void introspectStringToLength ( char * string, int length );

@@ -110,6 +110,86 @@ int copyStringLengthIntoString ( char * source, int length, char * destination )
 	
 }
 
+int insertStringAtPositionInStringToLimit ( char * source, int destinationPosition, char * destination, int lengthLimit ) {
+	
+	debug();
+	
+	// How much can we fit?
+	
+	int ignoredCharacters = destinationPosition;
+	
+	int consideredCharacters = lengthLimit - ignoredCharacters;
+	
+	int availableCharacters = consideredCharacters - ( strlen ( destination ) - ignoredCharacters );
+	
+	int charactersToCopy = strlen ( source );
+	
+	if ( availableCharacters < charactersToCopy ) return false;
+	
+	
+	int positionToChange = ( strlen ( destination ) - 1 );
+	
+	int positionToMove = positionToChange + charactersToCopy;
+	
+	while ( positionToChange >= destinationPosition ) {
+		
+		// Move the destination's character back.
+		
+		destination [ positionToMove ] = destination [ positionToChange ];
+		
+		/*
+		printf ( "\n\nMove\n" );
+		
+		printf ( "\n" );
+		
+		for ( int i = 0; i < positionToChange; i++ ) printf ( " " );
+		
+		printf ( "." );
+		
+		for ( int i = positionToChange + 1; i < positionToMove; i++ ) printf ( "-" );
+		
+		printf ( "v" );
+		
+		printf ( " ( %d -> %d )\n", positionToChange, positionToMove );
+		
+		printf ( "%s\n", destination );
+		
+		printf ( "\n" );
+		
+		introspectString ( source );
+		
+		introspectString ( destination );
+		*/
+		
+		
+		positionToChange--;
+		
+		positionToMove--;
+		
+	}
+	
+	
+	positionToChange = destinationPosition;
+	
+	int positionToCopy = 0;
+	
+	for ( int charactersMoved = 0; charactersMoved < charactersToCopy; charactersMoved++ ) {
+		
+		// Copy the source's character to the destination.
+		
+		destination [ positionToChange ] = source [ positionToCopy ];
+		
+		positionToChange++;
+		
+		positionToCopy++;
+		
+	}
+	
+	
+	return true;
+	
+}
+
 
 char * limitStringLength ( char * originalString, int length ) {
 	
@@ -166,6 +246,25 @@ void introspectString ( char * string ) {
 			string [ i ],
 			string [ i ]
 		);
+	
+	printf ( "\n" );
+	
+	fflush ( stdout );
+	
+}
+
+
+void introspectStringToLength ( char * string, int length ) {
+	
+	debug();
+	
+	for ( int i = 0; i <= length; i++ )
+		
+		printf (
+				" %c (%d);",
+				string [ i ],
+				string [ i ]
+				);
 	
 	printf ( "\n" );
 	

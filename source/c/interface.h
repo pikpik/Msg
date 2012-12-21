@@ -11,28 +11,14 @@
 #include <signal.h>
 
 
-// Definitions
-
-#define enterKeyCharacter '\n'
-#define escapeKeyCharacter '\033'
-#define escapeKeyString "\033"
-#define escapeKeyInteger 27
-#define ANSICSIString escapeKeyString "["
-#define leftArrowKeyString ANSICSIString "D"
-#define rightArrowKeyString ANSICSIString "C"
-#define cursorBackwardKeyString ANSICSIString "1D"
-#define cursorForwardKeyString ANSICSIString "1C"
-#define clearLineString ANSICSIString "2K"
-
-// See: http://en.wikipedia.org/wiki/ANSI_escape_sequences
-
-
 // Globals
 
 extern char message [ 256 ];
 
 
 // Functions
+
+void sendToTerminal ( void );
 
 void clearMessageLine ( void );
 
@@ -44,8 +30,10 @@ void moveCaretForward ( void );
 
 void moveCaretBackward ( void );
 
-void editMessageLine ( void );
+void deleteCharacter ( void );
 
-void interpretCommand ();
+void interpretKey ( char * input );
+
+void interpretCommand ( void );
 
 void showNewMessage ( char * inbox );

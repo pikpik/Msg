@@ -96,6 +96,7 @@ int openConnection ( char * domain, int port ) {
 	
 }
 
+
 void sendMessage ( int connection, char * buffer ) {
 	
 	debug();

@@ -26,6 +26,19 @@ static struct termios originalterm;
 
 // Functions
 
+void startUsingTerminal ( int fd ) {
+	
+	debug();
+	
+	enableCharacterBreakMode ( fd );
+	
+	// Let's read from the "file," or socket, without waiting for it.
+	
+	fcntl ( fd, F_SETFL, O_NONBLOCK );
+	
+}
+
+
 void enableCharacterBreakMode ( int fd ) {
 	
 	debug();
@@ -77,58 +90,37 @@ int getch () {
 }
 
 
-void interpretKey ( char character ) {
-	
-	debug();
-	
-	if ( strlen ( input ) > 0 ) {
-		
-		fflush ( stdout );
-		
-		appendCharacterToStringToLimit ( character, input, 255 );
-		
-		editMessageLine ();
-		
-	} else {
-		
-		if ( (int) character == escapeKeyInteger ) {
-			
-			// It could be the beginning of an ANSI escape sequence.
-			
-			// We'll check later characters for line-editing commands.
-			
-			strcpy ( input, escapeKeyString );
-			
-		} else if ( character == enterKeyCharacter ) {
-			
-			interpretCommand ();
-			
-		} else {
-			
-			// It's probably an ordinary character the user typed.
-			
-			appendCharacterToStringToLimit ( character, message, 255 );
-			
-			moveCaretForward ();
-			
-		}
-		
-	}
-}
-
-
 void onKeyPress ( int fileNumber, int event ) {
 	
 	debug();
 	
 	if ( event & EventReadable ) {
 		
-		interpretKey ( getchar () );
+		char inputString [ 256 ];
+		char stringChunk [ 256 ];
+		
+		memset ( & inputString, 0, sizeof inputString );
+		memset ( & stringChunk, 0, sizeof stringChunk );
+		
+		while ( read ( fileNumber, stringChunk, 255 ) > 0 )
+			
+			appendStringToStringToLimit ( stringChunk, inputString, 255 );
+		
+		interpretKey ( inputString );
 		
 	}
 	
 	if ( event & EventFailed )
 		
 		error ( "I had a problem while waiting for keys to be pressed!\n" );
+	
+}
+
+
+void stopUsingTerminal ( int fd ) {
+	
+	debug();
+	
+	restoreTerminal ( fd );
 	
 }

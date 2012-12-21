@@ -19,6 +19,17 @@ int updateMessageLineTimes = 0;
 
 // Functions
 
+void sendToTerminal ( void ) {
+	
+	// Make sure things get sent to the terminal.
+	
+	if ( fflush ( stdout ) != 0 )
+		
+		error ( NULL );
+	
+}
+
+
 void clearMessageLine ( void ) {
 	
 	debug();
@@ -40,21 +51,13 @@ void updateMessageLine ( void ) {
 	
 	clearMessageLine ();
 	
-	
-	// Put what the user's writing on the screen.
-	
 	moveCaretToPosition ( 0 );
 	
 	printf ( "%s", message );
 	
 	moveCaretToPosition ( caretPosition );
 	
-	
-	// Make sure things get sent to the terminal.
-	
-	if ( fflush ( stdout ) != 0 )
-		
-		error ( NULL );
+	sendToTerminal ();
 	
 }
 
@@ -63,7 +66,7 @@ void moveCaretToPosition ( int position ) {
 	
 	debug();
 	
-	printf ( "%c[%dG", escapeKeyCharacter, position );
+	printf ( "%s[%dG", escapeKeyString, position );
 	
 }
 
@@ -85,40 +88,60 @@ void moveCaretBackward ( void ) {
 	
 	debug();
 	
-	caretPosition = ( caretPosition <= 0 ) ? 0 : caretPosition - 1;
+	caretPosition = ( caretPosition <= 1 ) ? 1 : caretPosition - 1;
 	
 	updateMessageLine ();
 	
 }
 
 
-void editMessageLine ( void ) {
+void deleteCharacter ( void ) {
+	
+	if ( caretPosition == 1 ) return;
+	
+	
+	int positionToDelete = caretPosition - 2;
+	
+	int originalMessageLength = strlen ( message );
+	
+	
+	for ( int position = positionToDelete; position <= originalMessageLength; position++ )
+		
+		message [ position ] = message [ position + 1 ];
+	
+	
+	moveCaretBackward ();
+	
+}
+
+
+void interpretKey ( char * input ) {
 	
 	debug();
-	
-	if ( input [ 0 ] == escapeKeyCharacter ) {
 		
-		if ( strcmp ( input, leftArrowKeyString ) == 0 || strcmp ( input, cursorBackwardKeyString ) == 0 ) {
-			
-			clearString ( input );
-			
-			moveCaretBackward ();
-			
-		} else if ( strcmp ( input, rightArrowKeyString ) == 0 || strcmp ( input, cursorForwardKeyString ) == 0 ) {
-			
-			clearString ( input );
-			
+	if ( ! strcmp ( input, leftArrowKeyString ) ) {
+		
+		moveCaretBackward ();
+		
+	} else if ( ! strcmp ( input, rightArrowKeyString ) ) {
+		
+		moveCaretForward ();
+		
+	} else if ( ! strcmp ( input, deleteKeyString ) ) {
+		
+		deleteCharacter ();
+		
+	} else if ( ! strcmp ( input, enterKeyString ) ) {
+		
+		interpretCommand ();
+		
+	} else {
+		
+		// It's probably an ordinary character the user typed.
+		
+		if ( insertStringAtPositionInStringToLimit ( input, caretPosition - 1, message, 255 ) )
+		
 			moveCaretForward ();
-				
-		} else {
-			
-			if ( strlen ( input ) > 2 ) {
-				
-				strcpy ( input, "" );
-				
-			}
-			
-		}
 		
 	}
 	

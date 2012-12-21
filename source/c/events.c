@@ -188,7 +188,7 @@ void signUpListeners ( void ) {
 }
 
 
-void runLoop ( int connection ) {
+void runLoop ( void ) {
 	
 	debug();
 	
@@ -205,11 +205,11 @@ int chatWithProtocolToServer ( char * protocol, int connection ) {
 	
 	signUpListeners ();
 	
-	enableCharacterBreakMode ( STDIN_FILENO );
+	startUsingTerminal ( STDIN_FILENO );
 	
-	runLoop ( connection );
+	runLoop ();
 	
-	restoreTerminal ( STDIN_FILENO );
+	stopUsingTerminal ( STDIN_FILENO );
 	
 	close ( connection );
 	
