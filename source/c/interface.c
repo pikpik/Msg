@@ -10,7 +10,11 @@
 
 // Global variables
 
-char message [ 256 ];
+#define messageLength				256
+
+#define messagePossibleCharacters	255
+
+char message [ messageLength ];
 
 int caretPosition = 1;
 
@@ -19,13 +23,28 @@ int updateMessageLineTimes = 0;
 
 // Functions
 
-void sendToTerminal ( void ) {
+void addLineToScreen ( char * text ) {
 	
-	// Make sure things get sent to the terminal.
+	debug();
 	
-	if ( fflush ( stdout ) != 0 )
-		
-		error ( NULL );
+	clearMessageLine ();
+	
+	moveCaretToPosition ( 0 );
+	
+	printf ( "%s", text );
+	
+}
+
+
+void updateMessageLine ( void ) {
+	
+	debug();
+	
+	addLineToScreen ( message );
+	
+	moveCaretToPosition ( caretPosition );
+	
+	sendToTerminal ();
 	
 }
 
@@ -45,19 +64,13 @@ void clearMessageLine ( void ) {
 }
 
 
-void updateMessageLine ( void ) {
+void sendToTerminal ( void ) {
 	
-	debug();
+	// Make sure things get sent to the terminal.
 	
-	clearMessageLine ();
-	
-	moveCaretToPosition ( 0 );
-	
-	printf ( "%s", message );
-	
-	moveCaretToPosition ( caretPosition );
-	
-	sendToTerminal ();
+	if ( fflush ( stdout ) != 0 )
+		
+		error ( NULL );
 	
 }
 
@@ -139,7 +152,7 @@ void interpretKey ( char * input ) {
 		
 		// It's probably an ordinary character the user typed.
 		
-		if ( insertStringAtPositionInStringToLimit ( input, caretPosition - 1, message, 255 ) )
+		if ( insertStringAtPositionInStringToLimit ( input, caretPosition - 1, message, messagePossibleCharacters ) )
 		
 			moveCaretForward ();
 		
@@ -160,7 +173,7 @@ void interpretCommand () {
 		
 		printf ( "A command!" );
 		
-		clearString ( message );
+		clearString ( message, messageLength );
 		
 		caretPosition = 1;
 		
@@ -172,21 +185,39 @@ void interpretCommand () {
 		
 		caretPosition = 1;
 		
-		updateMessageLine ();
-		
-		clearString ( message );
+		addLineToScreen ( message );
 		
 		printf ( "\n" );
+		
+		putMessageInOutbox ( message );
+		
+		clearString ( message, messageLength );
+		
+		updateMessageLine ();
 		
 	}
 	
 }
 
 
-void showNewMessage ( char * inbox ) {
+void showNewMessage ( char * text ) {
 	
 	debug();
 	
-	printf ( "%s", inbox );
+	
+	// Remove newline characters.
+	
+	//char * characterToRemove;
+	
+	//while ( ( characterToRemove = strstr ( text, "\n" ) ) != NULL )
+		
+	//	( * characterToRemove ) = '\0';
+	
+	
+	addLineToScreen ( text );
+	
+	printf ( "\n" );
+	
+	updateMessageLine ();
 	
 }

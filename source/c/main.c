@@ -13,11 +13,16 @@ int main ( int argc, char * argv [] ) {
 	
 	debug();
 	
+	
+	// Get ready
+	
 	char protocol [ 256 ];
 	
 	char domain [ 256 ];
 	
-	int port;
+	char port [ 256 ];
+	
+	awaken ();
 	
 	
 	// What are we supposed to do?
@@ -28,7 +33,7 @@ int main ( int argc, char * argv [] ) {
 		
 		argc >= 3 && useDomainOption ( argv [ 2 ], domain ) &&
 		
-		argc >= 4 && usePortOption ( argv [ 3 ], & port ) &&
+		argc >= 4 && usePortOption ( argv [ 3 ], port ) &&
 		
 		chatWithProtocolToServer (
 			
@@ -52,15 +57,17 @@ int useProtocolOption ( char * protocolOption, char * protocol ) {
 	
 	debug();
 	
+	
 	// Later, this should return a struct(ure) of named functions for actions.
 	
 	if (
 		
-		strcmp ( protocolOption, "irc" ) == 0 &&
+		! strcmp ( protocolOption, "irc" ) &&
 		
 		copyStringLengthIntoString ( protocolOption, 255, protocol )
 		
 	)	return true;
+	
 	
 	warning (
 		
@@ -80,20 +87,21 @@ int useDomainOption ( char * domainOption, char * domain ) {
 	
 	debug();
 	
+	
 	if (
 		
-		strlen ( domainOption ) > 3 &&
+		strlen ( domainOption ) < 256 &&
 		
 		copyStringLengthIntoString ( domainOption, 255, domain )
 		
 	)	return true;
+	
 	
 	warning (
 		
 		"\n"
 		"Unknown domain.\n"
 		"\n"
-		"Try: irc.freenode.net\n"
 		
 	);
 	
@@ -102,30 +110,29 @@ int useDomainOption ( char * domainOption, char * domain ) {
 }
 
 
-int usePortOption ( char * portOption, int * port ) {
+int usePortOption ( char * portOption, char * port ) {
 	
 	debug();
 	
-	// Switch to strtol?
 	
-	int testNumberOfPort = atoi ( portOption );
+	// Switch atoi to strtol?
 	
-	if ( port >= 0 ) {
+	if (
 		
-		// Copy the new number to port's address.
+		strlen ( portOption ) < 256 &&
 		
-		* port = testNumberOfPort;
+		atoi ( portOption ) >= 0 &&
 		
-		return true;
+		copyStringLengthIntoString ( portOption, 255, port )
 		
-	}
+	)	return true;
+	
 	
 	warning (
 		
 		"\n"
 		"Not a port.\n"
 		"\n"
-		"Try: 6667\n"
 		
 	);
 	

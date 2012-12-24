@@ -16,107 +16,83 @@ char inbox [ 256 ];
 
 // Functions
 
-int openConnection ( char * domain, int port ) {
+int openConnection ( char * domain, char * port ) {
 	
 	debug();
 	
-	struct sockaddr_in serverIPAddress;
 	
-	struct hostent * server;
+	int socketConnection;
+	
+	int response;
 	
 	
-	int connection = socket ( AF_INET, SOCK_STREAM, 0 );
+	struct addrinfo options;
 	
-	if ( connection < 0 )
+	memset ( & options, 0 , sizeof options );
+	
+	options.ai_family = AF_UNSPEC;
+	options.ai_socktype = SOCK_STREAM;
+	options.ai_flags = AI_PASSIVE;
+	
+	
+	struct addrinfo * addressMatches;
+	
+	response = getaddrinfo ( domain, port, & options, & addressMatches );
+	
+	if ( response ) {
 		
-		error ( "Unable to start a connection." );
-	
-	
-	server = gethostbyname ( domain );
-	
-	if ( server == NULL )
+		printf ( "%s\n", gai_strerror ( response ) );
 		
-		error ( "Unable to find specified server." );
-	
-	
-	memset (
-			
-			( char * ) &serverIPAddress,
-			
-			0,
-			
-			sizeof ( serverIPAddress )
-			
-	);
-	
-	bcopy (
-			
-			( char * ) server->h_addr,
-			
-			( char * ) &serverIPAddress.sin_addr.s_addr,
-			
-			server->h_length
-			
-	);
-	
-	
-	serverIPAddress.sin_family = AF_INET;
-	
-	serverIPAddress.sin_port = htons ( port );
-	
-	
-	if (
+		exit ( 1 );
 		
-		connect (
-				
-				connection,
-				
-				( struct sockaddr * ) & serverIPAddress,
-				
-				sizeof ( serverIPAddress )
-				
-		) < 0
+	}
+	
+	
+	for ( struct addrinfo * attempt = addressMatches; attempt != NULL; attempt = attempt->ai_next ) {
 		
-	)
+		socketConnection = socket ( attempt->ai_family, attempt->ai_socktype, attempt->ai_protocol );
 		
-		error ( "Unable to connect to the server." );
+		if ( socketConnection < 0 )
+			
+			continue;
+		
+		
+		response = connect ( socketConnection, attempt->ai_addr, attempt->ai_addrlen );
+		
+		if ( response )
+			
+			continue;
+		
+		
+		break;
+	}
 	
 	
 	// Let's read from the "file," or socket, without waiting for it.
 	
-	fcntl ( connection, F_SETFL, O_NONBLOCK );
+	fcntl ( socketConnection, F_SETFL, O_NONBLOCK );
+	
+	//printf ( "fcntl: %d\n", fcntl ( socketConnection, F_SETFL, O_NONBLOCK ) );
+	
+	//warning ( "fcntl?" );
 	
 	
 	// Start listening!
 	
-	when ( connection, EventReadable | EventFailed, & newMessage );
+	when ( socketConnection, EventReadable | EventWritable | EventFailed, & onNetworkMessage );
 	
 	
-	return connection;
-	
-}
-
-
-void sendMessage ( int connection, char * buffer ) {
-	
-	debug();
-	
-	int result = write ( connection, buffer, strlen ( buffer ) );
-	
-	if ( result < 0 )
-		
-		error ( "Unable to send messages." );
+	return socketConnection;
 	
 }
 
 
-void newMessage ( int connection, int events ) {
+void onNetworkMessage ( int connection, int events ) {
 	
 	debug();
+	
 	
 	if ( events & EventReadable ) {
-		
-		debug();
 		
 		int response;
 		
@@ -129,9 +105,53 @@ void newMessage ( int connection, int events ) {
 		
 		if ( response == 0 )
 			
-			waitingToQuit = 0;
+			stillListening = false;
 		
 	}
+	
+	if ( events & EventWritable )
+		
+		//printf ( "I can write now!\n" );
+		
+		sendMessage ( connection );
+	
+	/*if ( events & EventFailed )
+		
+		printf ( "Something went wrong.\n" );*/
+	
+}
+
+
+void putMessageInOutbox ( char * message ) {
+	
+	debug();
+	
+	clearString ( outbox, 256 );
+	
+	copyStringLengthIntoString ( message, 255, outbox );
+	
+}
+
+
+void sendMessage ( int connection ) {
+	
+	debug();
+	
+	
+	if ( ! strlen ( outbox ) ) return;
+	
+	
+	outbox [ strlen ( outbox ) ] = '\r';
+	outbox [ strlen ( outbox ) ] = '\n';
+	
+	int result = write ( connection, outbox, strlen ( outbox ) );
+	
+	if ( result < 0 )
+		
+		error ( "Unable to send messages." );
+	
+	
+	clearString ( outbox, 256 );
 	
 }
 

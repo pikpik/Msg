@@ -22,7 +22,7 @@
 
 // Global variables
 
-extern int waitingToQuit;
+extern int stillListening;
 
 
 // Functions
@@ -35,10 +35,8 @@ void recognize ( int i );
 
 int getHighestFileDescriptor ( void );
 
-int waiting ( void );
+int listening ( void );
 
 void runLoop ( void );
 
 int chatWithProtocolToServer ( char * protocol, int connection );
-
-void signUpListeners ( void );

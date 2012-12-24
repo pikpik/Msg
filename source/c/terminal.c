@@ -32,9 +32,23 @@ void startUsingTerminal ( int fd ) {
 	
 	enableCharacterBreakMode ( fd );
 	
+	
 	// Let's read from the "file," or socket, without waiting for it.
 	
 	fcntl ( fd, F_SETFL, O_NONBLOCK );
+	
+	
+	// Listen for events!
+	
+	when (
+		
+		STDIN_FILENO,
+		
+		EventReadable | EventFailed,
+		
+		& onKeyPress
+		
+	);
 	
 }
 

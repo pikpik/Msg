@@ -9,20 +9,9 @@
 
 // Global variables
 
-#define listenerLimit	255
-
+#define listenerLimit	FD_SETSIZE
 
 int numberOfListeners = 0;
-
-
-fd_set	listeningToRead,
-		listeningToWrite,
-		listeningForError;
-
-fd_set	listenersAreReadable,
-		listenersAreWritable,
-		listenersAreFailed;
-
 
 typedef struct {
 	
@@ -32,13 +21,16 @@ typedef struct {
 	
 } listenerStructure;
 
-
 listenerStructure listeners [ listenerLimit ];
+
+
+fd_set	listeningToRead,		listeningToWrite,		listeningForFailure,
+		listenersCanRead,		listenersCanWrite,		listenersHaveFailed;
 
 
 // Use this to stop.
 
-int waitingToQuit = 1;
+int stillListening = true;
 
 
 // Functions
@@ -47,11 +39,15 @@ void awaken ( void ) {
 	
 	debug();
 	
+	
+	int numberOfListeners = 0;
+	
+	
 	FD_ZERO ( & listeningToRead );
 	
 	FD_ZERO ( & listeningToWrite );
 	
-	FD_ZERO ( & listeningForError );
+	FD_ZERO ( & listeningForFailure );
 	
 }
 
@@ -59,6 +55,7 @@ void awaken ( void ) {
 void when ( int file, int events, void ( * action ) ) {
 	
 	debug();
+	
 	
 	listeners [ numberOfListeners ].file = file;
 	
@@ -75,7 +72,7 @@ void when ( int file, int events, void ( * action ) ) {
 	
 	if ( events & EventFailed )
 		
-		FD_SET ( file, & listeningForError );
+		FD_SET ( file, & listeningForFailure );
 	
 	
 	numberOfListeners++;
@@ -87,18 +84,52 @@ void recognize ( int i ) {
 	
 	debug();
 	
+	
 	int events = 0;
 	
 	
-	if ( FD_ISSET ( listeners [ i ].file, & listenersAreReadable ) )
+	if ( FD_ISSET ( listeners [ i ].file, & listenersCanRead ) ) {
 		
 		events |= EventReadable;
+		
+		
+		/*
+		 
+		 Notes
+		 
+		 Bug: the first to read gets the data.
+		 
+		 Solution: allow many listeners per event source.
+		 
+		 Have one fd_set of sources and another queue with listeners per source.
+		 
+		 listeners [ FD ] [ event type ] = { function 1, function 2, ... };
+		 
+		 When a listener is added for a file descriptor (FD), the FD is added to the fd_set if it isn't already in it.
+		 
+		 When a listener is removed for an FD, the list is searched by function address and the function is removed.
+		 
+		 If an FD's list empties, then the list is removed and the FD is removed from the fd_set.
+		 
+		 When an event arrives for an FD, the data is read into a buffer, and then the buffer of data is copied to every appropriate listener.
+		 
+		*/
+		
+		/*char whatWasRead [ 256 ];
+		
+		memset ( & whatWasRead, '\0', 256 );
+		
+		read ( listeners [ i ].file, whatWasRead, 255 );
+		
+		printf ( "%s\n", whatWasRead );*/
+		
+	}
 	
-	if ( FD_ISSET ( listeners [ i ].file, & listenersAreWritable ) )
+	if ( FD_ISSET ( listeners [ i ].file, & listenersCanWrite ) )
 		
 		events |= EventWritable;
 	
-	if ( FD_ISSET ( listeners [ i ].file, & listenersAreFailed ) )
+	if ( FD_ISSET ( listeners [ i ].file, & listenersHaveFailed ) )
 		
 		events |= EventFailed;
 	
@@ -106,7 +137,7 @@ void recognize ( int i ) {
 	if ( listeners [ i ].action != NULL )
 		
 		listeners [ i ].action ( listeners [ i ].file, events );
-
+	
 }
 
 
@@ -114,7 +145,9 @@ int getHighestFileDescriptor ( void ) {
 	
 	debug();
 	
+	
 	int highest = -1;
+	
 	
 	for ( int i = 0; i < numberOfListeners; i++ )
 		
@@ -122,68 +155,65 @@ int getHighestFileDescriptor ( void ) {
 			
 			highest = listeners [ i ].file;
 	
-	return ( highest > -1 ) ? highest + 1 : -1;
+	
+	return highest;
 	
 }
 
 
-int waiting ( void ) {
+int listening ( void ) {
 	
 	debug();
 	
-	listenersAreReadable = listeningToRead;
 	
-	listenersAreWritable = listeningToWrite;
+	FD_COPY ( & listeningToRead, & listenersCanRead );
 	
-	listenersAreFailed = listeningForError;
-
+	FD_COPY ( & listeningToWrite, & listenersCanWrite );
+	
+	FD_COPY ( & listeningForFailure, & listenersHaveFailed );
+	
+	
+	//struct timeval timeout;
+	
+	//timeout.tv_sec = 2;
+	
 	
 	int result = select (
 		
-		getHighestFileDescriptor (),
+		getHighestFileDescriptor () + 1,
 		
-		& listenersAreReadable,
+		& listenersCanRead,
 		
-		& listenersAreWritable,
+		& listenersCanWrite,
 		
-		& listenersAreFailed,
+		& listenersHaveFailed,
 		
-		NULL
+		NULL //& timeout
 		
 	);
 	
-	if ( 0 > result )
+	
+	if ( result < 0 ) {
 		
 		error ( __FILE__ );
+		
+		stillListening = false;
+		
+	}
 	
 	
 	for (
-		int listener = 0;
-		listener < numberOfListeners;
-		listener++
-	)
 		
-		recognize ( listener );
+		int listener = 0;
+		
+		listener < numberOfListeners;
+		
+		listener++
+		
+	)	recognize ( listener );
 	
 	
-	return true;
-	
-}
-
-
-void signUpListeners ( void ) {
-	
-	debug();
-	
-	when (
-		  
-		  STDIN_FILENO,
-		  
-		  EventReadable | EventFailed,
-		  
-		  & onKeyPress
-		  
-	);
+	return stillListening;
 	
 }
 
@@ -192,7 +222,7 @@ void runLoop ( void ) {
 	
 	debug();
 	
-	while ( waitingToQuit && waiting () );
+	while ( listening () );
 	
 }
 
@@ -200,10 +230,6 @@ void runLoop ( void ) {
 int chatWithProtocolToServer ( char * protocol, int connection ) {
 	
 	debug();
-	
-	awaken ();
-	
-	signUpListeners ();
 	
 	startUsingTerminal ( STDIN_FILENO );
 	
@@ -216,26 +242,3 @@ int chatWithProtocolToServer ( char * protocol, int connection ) {
 	return true;
 	
 }
-
-
-/*
-
-Notes
-
-Bug: the first to read gets the data.
-
-Solution: allow many listeners per event source.
-
-Have one fd_set of sources and another queue with listeners per source.
-
-listeners [ FD ] [ event type ] = { function 1, function 2, ... };
-
-When a listener is added for a file descriptor (FD), the FD is added to the fd_set if it isn't already in it.
-
-When a listener is removed for an FD, the list is searched by function address and the function is removed.
-
- If an FD's list empties, then the list is removed and the FD is removed from the fd_set.
-
-When an event arrives for an FD, the data is read into a buffer, and then the buffer of data is copied to every appropriate listener.
-
-*/

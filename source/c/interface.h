@@ -18,11 +18,13 @@ extern char message [ 256 ];
 
 // Functions
 
-void sendToTerminal ( void );
+void addLineToScreen ( char * text );
+
+void updateMessageLine ( void );
 
 void clearMessageLine ( void );
 
-void updateMessageLine ( void );
+void sendToTerminal ( void );
 
 void moveCaretToPosition ( int position );
 
@@ -34,6 +36,6 @@ void deleteCharacter ( void );
 
 void interpretKey ( char * input );
 
-void interpretCommand ( void );
+void interpretCommand ();
 
-void showNewMessage ( char * inbox );
+void showNewMessage ( char * text );

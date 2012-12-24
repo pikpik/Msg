@@ -9,6 +9,7 @@ void help ( void ) {
 	
 	debug();
 	
+	
 	fprintf (
 		
 		stdout,
@@ -34,6 +35,7 @@ void warning ( const char * message ) {
 	
 	debug();
 	
+	
 	if ( errno )
 		
 		perror ( ( message ) ? message : NULL );
@@ -49,6 +51,7 @@ void error ( const char * message ) {
 	
 	debug();
 	
+	
 	warning ( ( message ) ? message : NULL );
 	
 	exit ( 1 );
@@ -60,6 +63,7 @@ int appendStringToStringToLimit ( char * suffix, char * base, int lengthLimit ) 
 	
 	debug();
 	
+	
 	strncat ( base, suffix, lengthLimit );
 	
 	return true;
@@ -70,6 +74,7 @@ int appendStringToStringToLimit ( char * suffix, char * base, int lengthLimit ) 
 int appendCharacterToStringToLimit ( char suffixCharacter, char * baseString, int lengthLimit ) {
 	
 	debug();
+	
 	
 	char convertedCharacter [ 1 ];
 	
@@ -85,6 +90,7 @@ int appendCharacterToStringToLimit ( char suffixCharacter, char * baseString, in
 int copyStringLengthIntoString ( char * source, int length, char * destination ) {
 	
 	debug();
+	
 	
 	memset (
 		
@@ -114,6 +120,7 @@ int insertStringAtPositionInStringToLimit ( char * source, int destinationPositi
 	
 	debug();
 	
+	
 	// How much can we fit?
 	
 	int ignoredCharacters = destinationPosition;
@@ -124,6 +131,7 @@ int insertStringAtPositionInStringToLimit ( char * source, int destinationPositi
 	
 	int charactersToCopy = strlen ( source );
 	
+	
 	if ( availableCharacters < charactersToCopy ) return false;
 	
 	
@@ -131,36 +139,12 @@ int insertStringAtPositionInStringToLimit ( char * source, int destinationPositi
 	
 	int positionToMove = positionToChange + charactersToCopy;
 	
+	
 	while ( positionToChange >= destinationPosition ) {
 		
 		// Move the destination's character back.
 		
 		destination [ positionToMove ] = destination [ positionToChange ];
-		
-		/*
-		printf ( "\n\nMove\n" );
-		
-		printf ( "\n" );
-		
-		for ( int i = 0; i < positionToChange; i++ ) printf ( " " );
-		
-		printf ( "." );
-		
-		for ( int i = positionToChange + 1; i < positionToMove; i++ ) printf ( "-" );
-		
-		printf ( "v" );
-		
-		printf ( " ( %d -> %d )\n", positionToChange, positionToMove );
-		
-		printf ( "%s\n", destination );
-		
-		printf ( "\n" );
-		
-		introspectString ( source );
-		
-		introspectString ( destination );
-		*/
-		
 		
 		positionToChange--;
 		
@@ -172,6 +156,7 @@ int insertStringAtPositionInStringToLimit ( char * source, int destinationPositi
 	positionToChange = destinationPosition;
 	
 	int positionToCopy = 0;
+	
 	
 	for ( int charactersMoved = 0; charactersMoved < charactersToCopy; charactersMoved++ ) {
 		
@@ -194,6 +179,7 @@ int insertStringAtPositionInStringToLimit ( char * source, int destinationPositi
 char * limitStringLength ( char * originalString, int length ) {
 	
 	debug();
+	
 	
 	// Add one byte for the null ending.
 	
@@ -226,11 +212,11 @@ char * limitStringLength ( char * originalString, int length ) {
 }
 
 
-void clearString ( char * string ) {
+void clearString ( char * string, int length ) {
 	
 	debug();
 	
-	strcpy ( string, "" );
+	memset ( string, '\0', length );
 	
 }
 

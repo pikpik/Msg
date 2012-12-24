@@ -9,4 +9,4 @@ int useProtocolOption ( char * protocolOption, char * protocol );
 
 int useDomainOption ( char * domainOption, char * domain );
 
-int usePortOption ( char * portOption, int * port );
+int usePortOption ( char * portOption, char * port );

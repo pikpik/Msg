@@ -16,6 +16,9 @@
 
 #define debugging				false
 
+
+// ANSI terminal sequences
+
 #define enterKeyString			"\n"
 #define escapeKeyString			"\033"
 #define deleteKeyString			"\177"
@@ -66,7 +69,7 @@ int insertStringAtPositionInStringToLimit ( char * source, int destinationPositi
 
 char * limitStringLength ( char * originalString, int length );
 
-void clearString ( char * string );
+void clearString ( char * string, int length );
 
 void introspectString ( char * string );
 
