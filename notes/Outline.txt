@@ -1,0 +1,45 @@
+Msg
+
+Concept
+
+	A fast, small, simple IRC program.
+
+
+Design
+
+	Single connection
+
+	Multiple channels
+
+	Stream-based
+
+
+Features
+
+	Small
+
+	Fast
+
+	Unix-compatible
+
+
+Additional IRC Commands
+
+	/msg	Sends a private message to a user
+
+
+Ideas
+
+	It could be turned into a "Swiss army knife" of connections and protocols by adding a "piping" syntax.
+
+	Examples
+
+		msg from irc://bot@irc.freenode.net:6667#minix to stdout
+
+		msg from http://www.google.com/ to irc://bot@irc.freenode.net:6667#something
+
+		msg from irc://pikpik@irc.freenode.net:6667#minix to me
+
+		msg from irc://pikpik@irc.freenode.net:6667 to me and file://log.txt
+
+		msg from http://wikipedia.org/ and http://google.com to file://mess.txt
