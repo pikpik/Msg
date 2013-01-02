@@ -16,20 +16,24 @@
 
 char message [ messageLength ];
 
-int caretPosition = 1;
+
+#define cursorStartingPosition		1
+
+int cursorPosition = cursorStartingPosition;
+
 
 int updateMessageLineTimes = 0;
 
 
 // Functions
 
-void addLineToScreen ( char * text ) {
+void addTextToScreen ( char * text ) {
 	
 	debug();
 	
 	clearMessageLine ();
 	
-	moveCaretToPosition ( 0 );
+	moveCursorToPosition ( 0 );
 	
 	printf ( "%s", text );
 	
@@ -40,9 +44,9 @@ void updateMessageLine ( void ) {
 	
 	debug();
 	
-	addLineToScreen ( message );
+	addTextToScreen ( message );
 	
-	moveCaretToPosition ( caretPosition );
+	moveCursorToPosition ( cursorPosition );
 	
 	sendToTerminal ();
 	
@@ -53,20 +57,12 @@ void clearMessageLine ( void ) {
 	
 	debug();
 	
-	// Return to first position on the line.
-	
 	printf ( clearLineString );
-	
-	// Erase the rest of the line.
-	
-	// How? Do we need to?
 	
 }
 
 
 void sendToTerminal ( void ) {
-	
-	// Make sure things get sent to the terminal.
 	
 	if ( fflush ( stdout ) != 0 )
 		
@@ -75,33 +71,40 @@ void sendToTerminal ( void ) {
 }
 
 
-void moveCaretToPosition ( int position ) {
+void moveCursorToPosition ( int position ) {
 	
 	debug();
+	
+	// Move the cursor horizontally.
+	
+	// See CHA - Cursor Horizontal Absolute at http://en.wikipedia.org/wiki/ANSI_escape_code#CSI_codes
 	
 	printf ( "%s[%dG", escapeKeyString, position );
 	
 }
 
 
-void moveCaretForward ( void ) {
+void moveCursorForward ( void ) {
 	
 	debug();
 	
-	// We let the caret go a character further than the text.
+	// We let the cursor go a character further than the text.
 	
-	if ( caretPosition < strlen ( message ) + 1 ) caretPosition++;
+	if ( cursorPosition < strlen ( message ) + 1 ) cursorPosition++;
 	
 	updateMessageLine ();
 	
 }
 
 
-void moveCaretBackward ( void ) {
+void moveCursorBackward ( void ) {
 	
 	debug();
 	
-	caretPosition = ( caretPosition <= 1 ) ? 1 : caretPosition - 1;
+	cursorPosition = ( cursorPosition <= cursorStartingPosition ) ?
+		cursorStartingPosition
+	:
+		cursorPosition - 1;
 	
 	updateMessageLine ();
 	
@@ -110,20 +113,28 @@ void moveCaretBackward ( void ) {
 
 void deleteCharacter ( void ) {
 	
-	if ( caretPosition == 1 ) return;
+	if ( cursorPosition == cursorStartingPosition ) return;
 	
 	
-	int positionToDelete = caretPosition - 2;
+	int positionToDelete = cursorPosition - 2;
 	
 	int originalMessageLength = strlen ( message );
 	
 	
-	for ( int position = positionToDelete; position <= originalMessageLength; position++ )
+	for (
+		
+		int position = positionToDelete;
+		
+		position <= originalMessageLength;
+		
+		position++
+		
+	)
 		
 		message [ position ] = message [ position + 1 ];
 	
 	
-	moveCaretBackward ();
+	moveCursorBackward ();
 	
 }
 
@@ -131,30 +142,34 @@ void deleteCharacter ( void ) {
 void interpretKey ( char * input ) {
 	
 	debug();
+	
+	if ( input [ 0 ] == escapeKeyString [ 0 ] ) {
 		
-	if ( ! strcmp ( input, leftArrowKeyString ) ) {
-		
-		moveCaretBackward ();
-		
-	} else if ( ! strcmp ( input, rightArrowKeyString ) ) {
-		
-		moveCaretForward ();
-		
-	} else if ( ! strcmp ( input, deleteKeyString ) ) {
-		
-		deleteCharacter ();
+		if ( ! strcmp ( input, leftArrowKeyString ) ) {
+			
+			moveCursorBackward ();
+			
+		} else if ( ! strcmp ( input, rightArrowKeyString ) ) {
+			
+			moveCursorForward ();
+			
+		}
 		
 	} else if ( ! strcmp ( input, enterKeyString ) ) {
 		
 		interpretCommand ();
 		
+	} else if ( ! strcmp ( input, deleteKeyString ) ) {
+		
+		deleteCharacter ();
+		
 	} else {
 		
-		// It's probably an ordinary character the user typed.
+		// It's probably an ordinary character.
 		
-		if ( insertStringAtPositionInStringToLimit ( input, caretPosition - 1, message, messagePossibleCharacters ) )
+		if ( insertStringAtPositionInStringToLimit ( input, cursorPosition - 1, message, messagePossibleCharacters ) )
 		
-			moveCaretForward ();
+			moveCursorForward ();
 		
 	}
 	
@@ -165,35 +180,35 @@ void interpretCommand () {
 	
 	debug();
 	
+	// See http://www.irchelp.org/irchelp/rfc/chapter4.html
+	
 	if ( strlen ( message ) == 0 ) {
 		
 		return;
 		
-	} else if ( message [ 0 ] == '/' ) {
+	} /*else if ( message [ 0 ] == '/' ) {
 		
 		printf ( "A command!" );
 		
-		clearString ( message, messageLength );
+		clearMessage ();
 		
-		caretPosition = 1;
+	}*/ else {
 		
-		updateMessageLine ();
+		// Show the message.
 		
-	} else {
-		
-		// Send the message.
-		
-		caretPosition = 1;
-		
-		addLineToScreen ( message );
+		addTextToScreen ( message );
 		
 		printf ( "\n" );
 		
+		
+		// Send the message.
+		
 		putMessageInOutbox ( message );
 		
-		clearString ( message, messageLength );
 		
-		updateMessageLine ();
+		// We don't need the message anymore.
+		
+		clearMessage ();
 		
 	}
 	
@@ -204,19 +219,18 @@ void showNewMessage ( char * text ) {
 	
 	debug();
 	
+	addTextToScreen ( text );
 	
-	// Remove newline characters.
+	updateMessageLine ();
 	
-	//char * characterToRemove;
+}
+
+
+void clearMessage ( void ) {
 	
-	//while ( ( characterToRemove = strstr ( text, "\n" ) ) != NULL )
-		
-	//	( * characterToRemove ) = '\0';
+	cursorPosition = cursorStartingPosition;
 	
-	
-	addLineToScreen ( text );
-	
-	printf ( "\n" );
+	clearString ( message, messageLength );
 	
 	updateMessageLine ();
 	

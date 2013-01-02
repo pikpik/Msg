@@ -1,0 +1,31 @@
+Demo script
+
+USER pikpik-msg * * :Pikpik via Msg
+NICK pikpik-msg
+JOIN #pikpikpikpik
+PRIVMSG #pikpikpikpik :Hellooo!
+
+
+Actions
+
+Upon connection:
+
+	Send: USER (username) * * :(username)
+
+	Send: NICK (username)
+
+Typed: /join (#...)
+
+	Send: JOIN (channel)
+
+Typed: anything without / at the beginning.
+
+	Send: PRIVMSG (channel) :(message)
+
+Typed: /msg (user) (message)
+
+	Send: PRIVMSG (user) :(message)
+
+Typed: /(...)
+
+	Send: (...)

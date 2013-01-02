@@ -257,3 +257,81 @@ void introspectStringToLength ( char * string, int length ) {
 	fflush ( stdout );
 	
 }
+
+
+bool isCharacterSafeForPrinting ( char character ) {
+	
+	return (
+		
+		(
+			
+				character == 9	// Horizontal tab (\t)
+			
+			||	character == 10	// Line feed (\n)
+			
+			||	character == 13	// Carriage return (\r)
+			
+		)
+		
+		||	isCharacterPrintable ( character )
+		
+	);
+	
+}
+
+
+bool isCharacterPrintable ( char character ) {
+	
+	// See http://en.wikipedia.org/wiki/ASCII#ASCII_control_characters
+	
+	return (
+		
+			character > 31		// Control characters
+		
+		&&	character != 127	// Delete
+		
+	);
+	
+}
+
+/*
+
+Start of text-searching engine.
+
+Concept:
+ 
+ char * message = "/join (channel)\0";
+ 
+ if ( ! stringsMatch ( afterStringPattern ( afterStringPattern ( afterString ( message, "JOIN" ), & isWhitespaceCharacter ), & isPrintableCharacter ), "\0" ) ) {
+	
+	char * channel = stringPattern ( afterStringPattern ( afterString ( message, "JOIN" ), & isWhitespaceCharacter ), & isPrintableCharacter );
+	
+	joinChannel ( channel );
+	
+ }
+
+bool isWhitespace ( char character ) {
+	
+	return (
+		
+			character == '\t'
+		||	character == ' '
+		
+	);
+	
+}
+
+bool isPrintable ( char character ) {
+	
+	return isCharacterPrintable ( character );
+	
+}
+
+bool isCharacterPattern () {
+	
+	for () {}
+	
+}
+
+bool getCharacterPattern () {}
+*/

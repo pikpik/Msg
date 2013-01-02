@@ -1,0 +1,9 @@
+I need to make the cursor jump to the correct position when something's pasted.
+
+I need to add IRC protocol support.
+
+I should add a text-entry prompt indicator.
+
+I should either restrict typing to a single line or handle multi-line editing.
+
+I need to add text pattern parsing.

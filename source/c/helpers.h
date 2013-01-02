@@ -2,6 +2,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include <sys/errno.h>
 #include <string.h>
 
@@ -9,10 +10,6 @@
 // Definitions
 
 #define appName					"msg"
-
-#define true					1
-
-#define false					0
 
 #define debugging				false
 
@@ -33,8 +30,8 @@
 #define clearLineString			ANSICSIString "2K"
 
 // See:
-//		http://en.wikipedia.org/wiki/ANSI_escape_sequences
 //		http://en.wikipedia.org/wiki/ASCII
+//		http://en.wikipedia.org/wiki/ANSI_escape_sequences
 //		http://pubs.opengroup.org/onlinepubs/9699919799/basedefs/V1_chap06.html
 
 
@@ -42,7 +39,7 @@
 
 #if debugging == true
 
-#	define debug() printf ( "%s:%s:%d\n", __FILE__, __func__, __LINE__ ); fflush ( stdout );
+#	define debug() printf ( "%s: %s: %d\n", __FILE__, __func__, __LINE__ ); fflush ( stdout );
 
 #else
 
@@ -74,3 +71,7 @@ void clearString ( char * string, int length );
 void introspectString ( char * string );
 
 void introspectStringToLength ( char * string, int length );
+
+bool isCharacterSafeForPrinting ( char character );
+
+bool isCharacterPrintable ( char character );
