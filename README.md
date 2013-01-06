@@ -5,7 +5,7 @@ A simple IRC interface.
 
 
 License
-=======
+-------
 
 Copyright (c) 2013, pikpik
 All rights reserved.
