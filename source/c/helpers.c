@@ -309,6 +309,9 @@ Concept:
 	joinChannel ( channel );
 	
  }
+ 
+*/
+
 
 bool isWhitespace ( char character ) {
 	
@@ -327,11 +330,145 @@ bool isPrintable ( char character ) {
 	
 }
 
-bool isCharacterPattern () {
+/*bool isCharacterPattern () {
 	
 	for () {}
 	
 }
 
-bool getCharacterPattern () {}
+bool getCharacterPattern () {}*/
+
+
+bool stringsMatch ( string a, string b ) {
+	
+	// Can strcmp compare \0's?
+	
+	// If not, we'll need to compare manually.
+	
+	return ( ! strcmp ( a, b ) );
+	
+}
+
+
+/*string stringFromTo ( string source, int from, int to ) {
+	
+	char subbuff[5];
+	
+	memcpy( subbuff, &buff[10], 4 );
+	
+	subbuff[4] = '\0';
+	
+}*/
+
+
+string stringAfterPattern ( string source, bool ( * patternFunction ) ( char ) ) {
+	
+	// Find the position after the pattern.
+	
+	int length = strlen ( source );
+	
+	int position;
+	
+	for ( position = 0; position < length; position++ ) {
+		
+		if ( ! patternFunction ( source [ position ] ) )
+			
+			break;
+		
+	}
+	
+	// If nothing matched,
+	// or the position is after the source string,
+	// then return an empty string.
+	
+	if (
+			position == 0
+		||	length <= position
+	)
+		
+		return "\0";
+	
+	// Copy the rest.
+	
+	// Ok, let's cheat and just return a pointer that's looking at the start of the substring.
+	
+	// This is faster and saves memory, but makes things fragile:
+	// any change to the substring changes the source string, and vice versa.
+	
+	return ( source + position );
+	
+}
+
+
+string stringAfterString ( string source, string term ) {
+	
+	// Where is the term in the string?
+	
+	string substring = strstr ( source, term );
+	
+	// If the term isn't in the source string
+	// or the term is longer than the source string, (Is this necessary?)
+	// then the say nothing matched.
+	
+	if (
+			substring == NULL
+		||	strlen ( source ) < strlen ( substring )
+	)
+		
+		return "\0";
+	
+	// Return a pointer to what's after the term.
+	
+	return substring + strlen ( term );
+	
+}
+
+
+string stringAfterPrefix ( string source, string prefix ) {
+	
+	// Where is the prefix in the string?
+	
+	string substring = strstr ( source, prefix );
+	
+	// If the prefix isn't in the source string,
+	// they aren't the same,
+	// or the prefix is longer than the source string, (Is this necessary?)
+	// then the say nothing matched.
+	
+	if (
+			substring == NULL
+		||	strcmp ( source, substring ) != 0
+		||	strlen ( source ) < strlen ( substring )
+	)
+		
+		return "\0";
+	
+	// Return a pointer to what's after the prefix.
+	
+	return source + strlen ( prefix );
+	
+}
+
+/*
+ 
+ String parser test cases
+ 
+ To be moved to unit tests later.
+ 
+ printf ( "Test ABC after A: [%s]\n", stringAfterString ( "ABC", "A" ) );
+ printf ( "Test ABC after B: [%s]\n", stringAfterString ( "ABC", "B" ) );
+ printf ( "Test ABC after C: [%s]\n", stringAfterString ( "ABC", "C" ) );
+ printf ( "Test ABC after AB: [%s]\n", stringAfterString ( "ABC", "AB" ) );
+ printf ( "Test ABC after BC: [%s]\n", stringAfterString ( "ABC", "BC" ) );
+ printf ( "Test ABC after ABC: [%s]\n", stringAfterString ( "ABC", "ABC" ) );
+ 
+ printf ( "\n" );
+ 
+ printf ( "Test ABC after A: [%s]\n", stringAfterPrefix ( "ABC", "A" ) );
+ printf ( "Test ABC after B: [%s]\n", stringAfterPrefix ( "ABC", "B" ) );
+ printf ( "Test ABC after C: [%s]\n", stringAfterPrefix ( "ABC", "C" ) );
+ printf ( "Test ABC after AB: [%s]\n", stringAfterPrefix ( "ABC", "AB" ) );
+ printf ( "Test ABC after BC: [%s]\n", stringAfterPrefix ( "ABC", "BC" ) );
+ printf ( "Test ABC after ABC: [%s]\n", stringAfterPrefix ( "ABC", "ABC" ) );
+
 */

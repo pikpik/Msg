@@ -35,6 +35,15 @@
 //		http://pubs.opengroup.org/onlinepubs/9699919799/basedefs/V1_chap06.html
 
 
+#if !defined(stringType)
+
+typedef char * string;
+
+#define stringType true
+
+#endif
+
+
 // Macros
 
 #if debugging == true
@@ -75,3 +84,15 @@ void introspectStringToLength ( char * string, int length );
 bool isCharacterSafeForPrinting ( char character );
 
 bool isCharacterPrintable ( char character );
+
+bool isWhitespace ( char character );
+
+bool isPrintable ( char character );
+
+bool stringsMatch ( string a, string b );
+
+string stringAfterPattern ( string source, bool ( * patternFunction ) ( char ) );
+
+string stringAfterString ( string source, string term );
+
+string stringAfterPrefix ( string source, string prefix );
