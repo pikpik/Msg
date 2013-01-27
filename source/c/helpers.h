@@ -85,13 +85,15 @@ bool isCharacterSafeForPrinting ( char character );
 
 bool isCharacterPrintable ( char character );
 
-bool isWhitespace ( char character );
+bool isWhitespaceCharacter ( char character );
 
-bool isPrintable ( char character );
+bool isPrintableCharacter ( char character );
 
 bool stringsMatch ( string a, string b );
 
 string stringAfterPattern ( string source, bool ( * patternFunction ) ( char ) );
+
+string stringOfPattern ( string source, bool ( * patternFunction ) ( char ) );
 
 string stringAfterString ( string source, string term );
 

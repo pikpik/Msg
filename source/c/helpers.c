@@ -313,7 +313,7 @@ Concept:
 */
 
 
-bool isWhitespace ( char character ) {
+bool isWhitespaceCharacter ( char character ) {
 	
 	return (
 		
@@ -324,7 +324,7 @@ bool isWhitespace ( char character ) {
 	
 }
 
-bool isPrintable ( char character ) {
+bool isPrintableCharacter ( char character ) {
 	
 	return isCharacterPrintable ( character );
 	
@@ -400,6 +400,44 @@ string stringAfterPattern ( string source, bool ( * patternFunction ) ( char ) )
 }
 
 
+string stringOfPattern ( string source, bool ( * patternFunction ) ( char ) ) {
+	
+	// Find the position after the pattern.
+	
+	int length = strlen ( source );
+	
+	int position;
+	
+	for ( position = 0; position < length; position++ ) {
+		
+		if ( ! patternFunction ( source [ position ] ) )
+			
+			break;
+		
+	}
+	
+	// If nothing matched,
+	// or the position is after the source string,
+	// then return an empty string.
+	
+	if (
+			position == 0
+		||	length <= position
+	)
+		
+		return "\0";
+	
+	// Copy position-many characters, starting at the beginning.
+	
+	string result;
+	
+	strncpy ( result, source, position );
+	
+	return result;
+	
+}
+
+
 string stringAfterString ( string source, string term ) {
 	
 	// Where is the term in the string?
@@ -455,20 +493,20 @@ string stringAfterPrefix ( string source, string prefix ) {
  
  To be moved to unit tests later.
  
- printf ( "Test ABC after A: [%s]\n", stringAfterString ( "ABC", "A" ) );
- printf ( "Test ABC after B: [%s]\n", stringAfterString ( "ABC", "B" ) );
- printf ( "Test ABC after C: [%s]\n", stringAfterString ( "ABC", "C" ) );
- printf ( "Test ABC after AB: [%s]\n", stringAfterString ( "ABC", "AB" ) );
- printf ( "Test ABC after BC: [%s]\n", stringAfterString ( "ABC", "BC" ) );
- printf ( "Test ABC after ABC: [%s]\n", stringAfterString ( "ABC", "ABC" ) );
+ printf ( "Test ABC after A: [%s]\n", stringAfterString ( "ABC", "A" ) ); Should be: BC
+ printf ( "Test ABC after B: [%s]\n", stringAfterString ( "ABC", "B" ) ); Should be: C
+ printf ( "Test ABC after C: [%s]\n", stringAfterString ( "ABC", "C" ) ); Should be: (\0)
+ printf ( "Test ABC after AB: [%s]\n", stringAfterString ( "ABC", "AB" ) ); Should be: C
+ printf ( "Test ABC after BC: [%s]\n", stringAfterString ( "ABC", "BC" ) ); Should be: (\0)
+ printf ( "Test ABC after ABC: [%s]\n", stringAfterString ( "ABC", "ABC" ) ); Should be: (\0)
  
  printf ( "\n" );
  
- printf ( "Test ABC after A: [%s]\n", stringAfterPrefix ( "ABC", "A" ) );
- printf ( "Test ABC after B: [%s]\n", stringAfterPrefix ( "ABC", "B" ) );
- printf ( "Test ABC after C: [%s]\n", stringAfterPrefix ( "ABC", "C" ) );
- printf ( "Test ABC after AB: [%s]\n", stringAfterPrefix ( "ABC", "AB" ) );
- printf ( "Test ABC after BC: [%s]\n", stringAfterPrefix ( "ABC", "BC" ) );
- printf ( "Test ABC after ABC: [%s]\n", stringAfterPrefix ( "ABC", "ABC" ) );
+ printf ( "Test ABC after A: [%s]\n", stringAfterPrefix ( "ABC", "A" ) ); Should be: BC
+ printf ( "Test ABC after B: [%s]\n", stringAfterPrefix ( "ABC", "B" ) ); Should be: (\0)
+ printf ( "Test ABC after C: [%s]\n", stringAfterPrefix ( "ABC", "C" ) ); Should be: (\0)
+ printf ( "Test ABC after AB: [%s]\n", stringAfterPrefix ( "ABC", "AB" ) ); Should be: C
+ printf ( "Test ABC after BC: [%s]\n", stringAfterPrefix ( "ABC", "BC" ) ); Should be: (\0)
+ printf ( "Test ABC after ABC: [%s]\n", stringAfterPrefix ( "ABC", "ABC" ) ); Should be: (\0)
 
 */

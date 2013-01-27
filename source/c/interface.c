@@ -186,13 +186,89 @@ void interpretCommand () {
 		
 		return;
 		
-	} /*else if ( message [ 0 ] == '/' ) {
+	} else if ( message [ 0 ] == '/' ) {
 		
-		printf ( "A command!" );
+		// printf ( "A command!" );
 		
-		clearMessage ();
+		/* if ( ! stringsMatch ( afterStringPattern ( afterStringPattern ( afterString ( message, "JOIN" ), & isWhitespaceCharacter ), & isPrintableCharacter ), "\0" ) ) {
+			
+			char * channel = stringPattern ( afterStringPattern ( afterString ( message, "JOIN" ), & isWhitespaceCharacter ), & isPrintableCharacter );
+			
+			joinChannel ( channel );
+			
+		} */
 		
-	}*/ else {
+		if ( strstr ( message, "/join" ) == message ) {
+		
+			/* Typed: /join (#...)
+			
+				Send: JOIN (channel) */
+			
+			 addTextToScreen ( "You used /join!" );
+			
+			 printf ( "\n" );
+			
+			 updateMessageLine ();
+			
+			/* char * channel =	stringOfPattern (
+								stringAfterPattern (
+								stringAfterString (
+									message,
+									"/join" ), & isWhitespaceCharacter ), & isPrintableCharacter
+			); */
+			
+			char * channel =	
+																	 stringAfterString (
+																						message,
+																						"/join" );
+			
+			printf( "/join string: %s %i\n", channel, channel );
+			
+			updateMessageLine ();
+			
+			// If they have not differences.
+			
+			if ( ! strcmp ( channel, "\0" ) ) return;
+			
+			//joinChannel ( channel );
+			
+		} else if ( strstr ( message, "/msg" ) == message ) {
+		
+			/* Typed: /msg (user) (message)
+			
+				Send: PRIVMSG (user) :(message) */
+			
+			// addTextToScreen ( "You used /msg!" );
+			
+			// printf ( "\n" );
+			
+			// updateMessageLine ();
+			
+		} else {
+			
+			// If something like /... is typed, send everything after the /.
+			
+			// This lets people try command on their own.
+			
+			// Show the message.
+			
+			addTextToScreen ( message );
+			
+			printf ( "\n" );
+			
+			
+			// Send the message.
+			
+			putMessageInOutbox ( ( message + 1 ) );
+			
+			
+			// We don't need the message anymore.
+			
+			clearMessage ();
+			
+		}
+			
+	} else {
 		
 		// Show the message.
 		
@@ -203,14 +279,18 @@ void interpretCommand () {
 		
 		// Send the message.
 		
+		// Send: PRIVMSG (channel) :(message)
+		
 		putMessageInOutbox ( message );
 		
 		
 		// We don't need the message anymore.
 		
-		clearMessage ();
+		//clearMessage ();
 		
 	}
+	
+	clearMessage ();
 	
 }
 
