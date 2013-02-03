@@ -5,6 +5,7 @@
 #include "helpers.h"
 #include "network.h"
 #include "terminal.h"
+#include "interface.h"
 
 
 // Global variables
@@ -232,6 +233,8 @@ int chatWithProtocolToServer ( char * protocol, int connection ) {
 	debug();
 	
 	startUsingTerminal ( STDIN_FILENO );
+	
+	startIRCConnection ();
 	
 	runLoop ();
 	

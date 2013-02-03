@@ -10,6 +10,8 @@
 #include <netdb.h>
 #include <signal.h>
 
+#include "helpers.h"
+
 
 // Globals
 
@@ -36,8 +38,18 @@ void deleteCharacter ( void );
 
 void interpretKey ( char * input );
 
+void startIRCConnection ( void );
+
 void interpretCommand ();
+
+void interpretIRCCommand ( string message );
+
+void sendPrivateMessageToRecipient ( string message, string recipient );
 
 void showNewMessage ( char * text );
 
 void clearMessage ( void );
+
+void joinChannel ( string channel );
+
+void filterChannel ( string channel );

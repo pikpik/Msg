@@ -17,6 +17,19 @@
 char message [ messageLength ];
 
 
+string currentChannel;
+
+/*
+
+ I could also add logging and channel paging.
+ 
+ But what's the point of this: a complete IRC client or a protocol utility?
+
+int channelPosition = -1;
+
+*/
+
+
 #define cursorStartingPosition		1
 
 int cursorPosition = cursorStartingPosition;
@@ -176,6 +189,17 @@ void interpretKey ( char * input ) {
 }
 
 
+void startIRCConnection ( void ) {
+	
+	string firstMessages =  "USER pikpik-msg * * :Pikpik via Msg\n"
+							"NICK pikpik-msg\n"
+							"\0";
+	
+	putMessageInOutbox ( firstMessages );
+	
+}
+
+
 void interpretCommand () {
 	
 	debug();
@@ -188,87 +212,56 @@ void interpretCommand () {
 		
 	} else if ( message [ 0 ] == '/' ) {
 		
-		// printf ( "A command!" );
-		
-		/* if ( ! stringsMatch ( afterStringPattern ( afterStringPattern ( afterString ( message, "JOIN" ), & isWhitespaceCharacter ), & isPrintableCharacter ), "\0" ) ) {
+		interpretIRCCommand ( message );
 			
-			char * channel = stringPattern ( afterStringPattern ( afterString ( message, "JOIN" ), & isWhitespaceCharacter ), & isPrintableCharacter );
+	} else {
+		
+		sendPrivateMessageToRecipient ( message, currentChannel );
+		
+	}
+	
+	clearMessage ();
+	
+}
+
+
+void interpretIRCCommand ( string message ) {
+	
+	if ( strstr ( message, "/join" ) == message ) {
+		
+		string channel = strstr ( message, "#\0" );
+		
+		if ( channel != NULL ) {
 			
 			joinChannel ( channel );
 			
-		} */
-		
-		if ( strstr ( message, "/join" ) == message ) {
-		
-			/* Typed: /join (#...)
-			
-				Send: JOIN (channel) */
-			
-			 addTextToScreen ( "You used /join!" );
-			
-			 printf ( "\n" );
-			
-			 updateMessageLine ();
-			
-			/* char * channel =	stringOfPattern (
-								stringAfterPattern (
-								stringAfterString (
-									message,
-									"/join" ), & isWhitespaceCharacter ), & isPrintableCharacter
-			); */
-			
-			char * channel =	
-																	 stringAfterString (
-																						message,
-																						"/join" );
-			
-			printf( "/join string: %s %i\n", channel, channel );
-			
-			updateMessageLine ();
-			
-			// If they have not differences.
-			
-			if ( ! strcmp ( channel, "\0" ) ) return;
-			
-			//joinChannel ( channel );
-			
-		} else if ( strstr ( message, "/msg" ) == message ) {
-		
-			/* Typed: /msg (user) (message)
-			
-				Send: PRIVMSG (user) :(message) */
-			
-			// addTextToScreen ( "You used /msg!" );
-			
-			// printf ( "\n" );
-			
-			// updateMessageLine ();
-			
-		} else {
-			
-			// If something like /... is typed, send everything after the /.
-			
-			// This lets people try command on their own.
-			
-			// Show the message.
-			
-			addTextToScreen ( message );
-			
-			printf ( "\n" );
-			
-			
-			// Send the message.
-			
-			putMessageInOutbox ( ( message + 1 ) );
-			
-			
-			// We don't need the message anymore.
+			filterChannel ( channel );
 			
 			clearMessage ();
 			
 		}
-			
+		
+	} else if ( strstr ( message, "/msg" ) == message ) {
+		
+		/* Typed: /msg (user) (message)
+		 
+		 Send: PRIVMSG (user) :(message) */
+		
+		strsep ();
+		
+		
+		string messagePart = strstr ( message, ":" );
+		
+		if ( strlen ( messagePart ) > 0 ) return;
+		
+		
+		sendPrivateMessageToRecipient ( messagePart, recipient );
+		
 	} else {
+		
+		// If something like /... is typed, send everything after the /.
+		
+		// This lets people try command on their own.
 		
 		// Show the message.
 		
@@ -279,18 +272,45 @@ void interpretCommand () {
 		
 		// Send the message.
 		
-		// Send: PRIVMSG (channel) :(message)
-		
-		putMessageInOutbox ( message );
+		putMessageInOutbox ( ( message + 1 ) );
 		
 		
 		// We don't need the message anymore.
 		
-		//clearMessage ();
+		clearMessage ();
 		
 	}
 	
-	clearMessage ();
+}
+
+
+void sendPrivateMessageToRecipient ( string message, string recipient ) {
+	
+	addTextToScreen ( message );
+	
+	
+	// Send the message.
+	
+	// Send: PRIVMSG (channel) :(message)
+	
+	char privateMessage [ 256 ];
+	
+	memset ( privateMessage, '\0', 256 );
+	
+	appendStringToStringToLimit ( "PRIVMSG ", privateMessage, 255 );
+	
+	appendStringToStringToLimit ( recipient, privateMessage, 255 );
+	
+	appendStringToStringToLimit ( " :", privateMessage, 255 );
+	
+	appendStringToStringToLimit ( message, privateMessage, 255 );
+	
+	putMessageInOutbox ( privateMessage );
+	
+	
+	// We don't need the message anymore.
+	
+	//clearMessage ();
 	
 }
 
@@ -313,5 +333,27 @@ void clearMessage ( void ) {
 	clearString ( message, messageLength );
 	
 	updateMessageLine ();
+	
+}
+
+
+void joinChannel ( string channel ) {
+	
+	char joinMessage [ 256 ];
+	
+	memset ( joinMessage, '\0', 256 );
+	
+	appendStringToStringToLimit ( "JOIN ", joinMessage, 255 );
+	
+	appendStringToStringToLimit ( channel, joinMessage, 255 );
+	
+	putMessageInOutbox ( joinMessage );
+	
+}
+
+
+void filterChannel ( string channel ) {
+	
+	currentChannel = channel;
 	
 }
