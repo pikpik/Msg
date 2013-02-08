@@ -6,4 +6,6 @@ I should add a text-entry prompt indicator.
 
 I should either restrict typing to a single line or handle multi-line editing.
 
-I need to add text pattern parsing.
+I need to track down places where partial messages are sent.
+
+I should try using a memory leak tool to find why its crashing on some lengths of text sent or received.

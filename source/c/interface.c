@@ -227,35 +227,57 @@ void interpretCommand () {
 
 void interpretIRCCommand ( string message ) {
 	
-	if ( strstr ( message, "/join" ) == message ) {
+	string remainingString;
+	
+	string stringPosition = message;
+	
+	
+	string command = strtok_r ( stringPosition, " \t", & remainingString );
+	
+	stringPosition = remainingString;
+	
+	if ( ! command ) return;
+	
+	
+	if ( ! strcmp ( command, "/join" ) ) {
 		
-		string channel = strstr ( message, "#\0" );
+		string channel = strtok_r ( stringPosition, " \t", & remainingString );
 		
-		if ( channel != NULL ) {
-			
-			joinChannel ( channel );
-			
-			filterChannel ( channel );
-			
-			clearMessage ();
-			
-		}
+		stringPosition = remainingString;
 		
-	} else if ( strstr ( message, "/msg" ) == message ) {
+		if ( ! channel ) return;
+		
+		joinChannel ( channel );
+		
+		filterChannel ( channel );
+		
+		clearMessage ();
+		
+	} else if ( ! strcmp ( command, "/msg" ) ) {
 		
 		/* Typed: /msg (user) (message)
 		 
-		 Send: PRIVMSG (user) :(message) */
-		
-		strsep ();
+		   Send: PRIVMSG (user) :(message) */
 		
 		
-		string messagePart = strstr ( message, ":" );
+		string recipient = strtok_r ( stringPosition, " \t", & remainingString );
 		
-		if ( strlen ( messagePart ) > 0 ) return;
+		stringPosition = remainingString;
 		
 		
-		sendPrivateMessageToRecipient ( messagePart, recipient );
+		if ( ! recipient ) return;
+		
+		if ( ! remainingString ) return;
+		
+		
+		// Move the editor to the next line.
+		
+		printf ( "\n" );
+		
+		
+		sendPrivateMessageToRecipient ( remainingString, recipient );
+		
+		clearMessage ();
 		
 	} else {
 		
@@ -265,7 +287,7 @@ void interpretIRCCommand ( string message ) {
 		
 		// Show the message.
 		
-		addTextToScreen ( message );
+		// addTextToScreen ( message );
 		
 		printf ( "\n" );
 		
@@ -284,9 +306,9 @@ void interpretIRCCommand ( string message ) {
 }
 
 
-void sendPrivateMessageToRecipient ( string message, string recipient ) {
+void sendPrivateMessageToRecipient ( string newMessage, string recipient ) {
 	
-	addTextToScreen ( message );
+	//addTextToScreen ( message );
 	
 	
 	// Send the message.
@@ -297,20 +319,17 @@ void sendPrivateMessageToRecipient ( string message, string recipient ) {
 	
 	memset ( privateMessage, '\0', 256 );
 	
+	
 	appendStringToStringToLimit ( "PRIVMSG ", privateMessage, 255 );
 	
 	appendStringToStringToLimit ( recipient, privateMessage, 255 );
 	
 	appendStringToStringToLimit ( " :", privateMessage, 255 );
 	
-	appendStringToStringToLimit ( message, privateMessage, 255 );
+	appendStringToStringToLimit ( newMessage, privateMessage, 255 );
+	
 	
 	putMessageInOutbox ( privateMessage );
-	
-	
-	// We don't need the message anymore.
-	
-	//clearMessage ();
 	
 }
 

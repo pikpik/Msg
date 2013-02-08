@@ -43,3 +43,19 @@ Ideas
 		msg from irc://pikpik@irc.freenode.net:6667 to me and file://log.txt
 
 		msg from http://wikipedia.org/ and http://google.com to file://mess.txt
+
+
+	Or
+
+		msg irc://pikpik@irc.freenode.net:6667
+
+			When pipes are detected:
+
+			Standard input is interpreted as messages or commands as if typed, per line.
+
+			Standard output is what is seen by the user, minus the message editing line.
+
+
+			When no pipes are detected:
+
+			The behavior is the same, except that the message editing line is used instead of standard input.
