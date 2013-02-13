@@ -510,3 +510,23 @@ string stringAfterPrefix ( string source, string prefix ) {
  printf ( "Test ABC after ABC: [%s]\n", stringAfterPrefix ( "ABC", "ABC" ) ); Should be: (\0)
 
 */
+
+string stringSeparatedFromString ( string separator, string * whole ) {
+	
+	string part;
+	
+	string remnant;
+	
+	part = strtok_r ( * whole, separator, & remnant );
+	
+	* whole = remnant;
+	
+	return part;
+	
+}
+
+bool sameStrings ( string a, string b ) {
+	
+	return ! strcmp ( a, b );
+	
+}

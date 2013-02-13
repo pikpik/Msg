@@ -1,12 +1,26 @@
 // Included things
 
 #include <stdio.h>
+#include <stdbool.h>
+
+#include "helpers.h"
+
+
+// Begin
+
+int main ( int argc, string argv [] );
 
 
 // Functions
 
-int useProtocolOption ( char * protocolOption, char * protocol );
+bool optionExists ( int argc, int number );
 
-int useDomainOption ( char * domainOption, char * domain );
+bool badString ( int argc, string argv [], int number );
 
-int usePortOption ( char * portOption, char * port );
+bool useNicknameOption ( int argc, string argv [], int number, string * nickname );
+
+bool useDomainOption ( int argc, string argv [], int number, string * domain );
+
+bool usePortOption ( int argc, char * argv [], int number, string * port );
+
+bool chatWithProtocolToServer ( int connection );

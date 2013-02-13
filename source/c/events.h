@@ -38,5 +38,3 @@ int getHighestFileDescriptor ( void );
 int listening ( void );
 
 void runLoop ( void );
-
-int chatWithProtocolToServer ( char * protocol, int connection );

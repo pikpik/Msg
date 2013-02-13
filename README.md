@@ -1,7 +1,7 @@
 Msg
 ===
 
-A simple IRC interface.
+A simple IRC program.
 
 
 License

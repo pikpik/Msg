@@ -2,6 +2,7 @@
 
 #include "events.h"
 
+#include "irc.h"
 #include "helpers.h"
 #include "network.h"
 #include "terminal.h"
@@ -41,7 +42,7 @@ void awaken ( void ) {
 	debug();
 	
 	
-	int numberOfListeners = 0;
+	numberOfListeners = 0;
 	
 	
 	FD_ZERO ( & listeningToRead );
@@ -224,24 +225,5 @@ void runLoop ( void ) {
 	debug();
 	
 	while ( listening () );
-	
-}
-
-
-int chatWithProtocolToServer ( char * protocol, int connection ) {
-	
-	debug();
-	
-	startUsingTerminal ( STDIN_FILENO );
-	
-	startIRCConnection ();
-	
-	runLoop ();
-	
-	stopUsingTerminal ( STDIN_FILENO );
-	
-	close ( connection );
-	
-	return true;
 	
 }

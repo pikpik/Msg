@@ -2,25 +2,27 @@
 
 #include "main.h"
 
-#include "helpers.h"
+#include "terminal.h"
 #include "network.h"
+#include "helpers.h"
 #include "events.h"
+#include "irc.h"
 
 
 // Begin
 
-int main ( int argc, char * argv [] ) {
+int main ( int argc, string argv [] ) {
 	
 	debug();
 	
 	
 	// Get ready
 	
-	char protocol [ 256 ];
+	// string nickname is global.
 	
-	char domain [ 256 ];
+	string domain;
 	
-	char port [ 256 ];
+	string port;
 	
 	awaken ();
 	
@@ -29,15 +31,13 @@ int main ( int argc, char * argv [] ) {
 	
 	if ( ! (
 		
-		argc >= 2 && useProtocolOption ( argv [ 1 ], protocol ) &&
+		useNicknameOption ( argc, argv, 1, & nickname ) &&
 		
-		argc >= 3 && useDomainOption ( argv [ 2 ], domain ) &&
+		useDomainOption ( argc, argv, 2, & domain ) &&
 		
-		argc >= 4 && usePortOption ( argv [ 3 ], port ) &&
+		usePortOption ( argc, argv, 3, & port ) &&
 		
 		chatWithProtocolToServer (
-			
-			protocol,
 			
 			openConnection ( domain, port )
 			
@@ -53,89 +53,107 @@ int main ( int argc, char * argv [] ) {
 
 // Functions
 
-int useProtocolOption ( char * protocolOption, char * protocol ) {
+bool optionExists ( int argc, int number ) {
 	
-	debug();
-	
-	
-	// Later, this should return a struct(ure) of named functions for actions.
-	
-	if (
-		
-		! strcmp ( protocolOption, "irc" ) &&
-		
-		copyStringLengthIntoString ( protocolOption, 255, protocol )
-		
-	)	return true;
-	
-	
-	warning (
-		
-		"\n"
-		"Unknown protocol.\n"
-		"\n"
-		"Try: irc\n"
-		
-	);
-	
-	return false;
+	return ( argc >= number + 1 );
 	
 }
 
 
-int useDomainOption ( char * domainOption, char * domain ) {
+bool badString ( int argc, string argv [], int number ) {
 	
-	debug();
-	
-	
-	if (
-		
-		strlen ( domainOption ) < 256 &&
-		
-		copyStringLengthIntoString ( domainOption, 255, domain )
-		
-	)	return true;
-	
-	
-	warning (
-		
-		"\n"
-		"Unknown domain.\n"
-		"\n"
-		
+	return (
+				! optionExists ( argc, number )
+			
+			||	strlen ( argv [ number ] ) >= 256
 	);
-	
-	return false;
 	
 }
 
 
-int usePortOption ( char * portOption, char * port ) {
+bool useNicknameOption ( int argc, string argv [], int number, string * nickname ) {
+	
+	if ( badString ( argc, argv, number ) ) {
+		
+		warning (
+			
+			"\n"
+			"Sorry, that's not a valid nickname.\n"
+			"\n"
+			
+		);
+		
+		return false;
+		
+	}
+	
+	* nickname = argv [ number ];
+	
+	return true;
+	
+}
+
+
+bool useDomainOption ( int argc, string argv [], int number, string * domain ) {
+	
+	if ( badString ( argc, argv, number ) ) {
+		
+		warning (
+			
+			"\n"
+			"Sorry, I don't think that's a valid server name.\n"
+			"\n"
+			
+		);
+		
+		return false;
+		
+	}
+	
+	* domain = argv [ number ];
+	
+	return true;
+	
+}
+
+
+bool usePortOption ( int argc, char * argv [], int number, string * port ) {
+	
+	if ( badString ( argc, argv, number ) ) {
+		
+		warning (
+			
+			"\n"
+			"Sorry, that's not a valid.\n"
+			"\n"
+			
+		);
+		
+		return false;
+		
+	}
+	
+	* port = argv [ number ];
+	
+	return true;
+	
+}
+
+
+bool chatWithProtocolToServer ( int connection ) {
 	
 	debug();
 	
+	startUsingTerminal ( STDIN_FILENO );
 	
-	// Switch atoi to strtol?
+	startIRCSession ();
 	
-	if (
-		
-		strlen ( portOption ) < 256 &&
-		
-		atoi ( portOption ) >= 0 &&
-		
-		copyStringLengthIntoString ( portOption, 255, port )
-		
-	)	return true;
+	runLoop ();
 	
+	stopUsingTerminal ( STDIN_FILENO );
 	
-	warning (
-		
-		"\n"
-		"Not a port.\n"
-		"\n"
-		
-	);
+	close ( connection );
 	
-	return false;
+	return true;
 	
 }

@@ -9,9 +9,9 @@
 
 // Definitions
 
-#define appName					"msg"
+#define appName				"msg"
 
-#define debugging				false
+#define debugging			false
 
 
 // ANSI terminal sequences
@@ -25,8 +25,8 @@
 
 #define leftArrowKeyString		ANSICSIString "D"
 #define rightArrowKeyString		ANSICSIString "C"
-#define cursorBackwardKeyString	ANSICSIString "1D"
-#define cursorForwardKeyString	ANSICSIString "1C"
+#define cursorBackwardKeyString		ANSICSIString "1D"
+#define cursorForwardKeyString		ANSICSIString "1C"
 #define clearLineString			ANSICSIString "2K"
 
 // See:
@@ -98,3 +98,7 @@ string stringOfPattern ( string source, bool ( * patternFunction ) ( char ) );
 string stringAfterString ( string source, string term );
 
 string stringAfterPrefix ( string source, string prefix );
+
+string stringSeparatedFromString ( string separator, string * whole );
+
+bool sameStrings ( string a, string b );

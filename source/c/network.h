@@ -11,10 +11,12 @@
 #include <sys/time.h>
 #include <sys/fcntl.h>
 
+#include "helpers.h"
+
 
 // Functions
 
-int openConnection ( char * domain, char * port );
+int openConnection ( string domain, string port );
 
 void onNetworkMessage ( int connection, int events );
 

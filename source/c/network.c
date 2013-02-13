@@ -2,9 +2,9 @@
 
 #include "network.h"
 
+#include "interface.h"
 #include "helpers.h"
 #include "events.h"
-#include "interface.h"
 
 
 // Global variables
@@ -16,7 +16,7 @@ char inbox [ 256 ];
 
 // Functions
 
-int openConnection ( char * domain, char * port ) {
+int openConnection ( string domain, string port ) {
 	
 	debug();
 	
@@ -28,7 +28,7 @@ int openConnection ( char * domain, char * port ) {
 	
 	struct addrinfo options;
 	
-	memset ( & options, 0 , sizeof options );
+	memset ( & options, 0, sizeof options );
 	
 	options.ai_family = AF_UNSPEC;
 	options.ai_socktype = SOCK_STREAM;
@@ -71,10 +71,6 @@ int openConnection ( char * domain, char * port ) {
 	// Let's read from the "file," or socket, without waiting for it.
 	
 	fcntl ( socketConnection, F_SETFL, O_NONBLOCK );
-	
-	//printf ( "fcntl: %d\n", fcntl ( socketConnection, F_SETFL, O_NONBLOCK ) );
-	
-	//warning ( "fcntl?" );
 	
 	
 	// Start listening!

@@ -6,6 +6,7 @@
 #include "events.h"
 #include "terminal.h"
 #include "helpers.h"
+#include "irc.h"
 
 
 // Global variables
@@ -16,26 +17,11 @@
 
 char message [ messageLength ];
 
-
-string currentChannel;
-
-/*
-
- I could also add logging and channel paging.
- 
- But what's the point of this: a complete IRC client or a protocol utility?
-
-int channelPosition = -1;
-
-*/
-
+int updateMessageLineTimes = 0;
 
 #define cursorStartingPosition		1
 
 int cursorPosition = cursorStartingPosition;
-
-
-int updateMessageLineTimes = 0;
 
 
 // Functions
@@ -189,17 +175,6 @@ void interpretKey ( char * input ) {
 }
 
 
-void startIRCConnection ( void ) {
-	
-	string firstMessages =  "USER pikpik-msg * * :Pikpik via Msg\n"
-							"NICK pikpik-msg\n"
-							"\0";
-	
-	putMessageInOutbox ( firstMessages );
-	
-}
-
-
 void interpretCommand () {
 	
 	debug();
@@ -216,120 +191,11 @@ void interpretCommand () {
 			
 	} else {
 		
-		sendPrivateMessageToRecipient ( message, currentChannel );
+		sendIRCMessage ( message );
 		
 	}
 	
 	clearMessage ();
-	
-}
-
-
-void interpretIRCCommand ( string message ) {
-	
-	string remainingString;
-	
-	string stringPosition = message;
-	
-	
-	string command = strtok_r ( stringPosition, " \t", & remainingString );
-	
-	stringPosition = remainingString;
-	
-	if ( ! command ) return;
-	
-	
-	if ( ! strcmp ( command, "/join" ) ) {
-		
-		string channel = strtok_r ( stringPosition, " \t", & remainingString );
-		
-		stringPosition = remainingString;
-		
-		if ( ! channel ) return;
-		
-		joinChannel ( channel );
-		
-		filterChannel ( channel );
-		
-		clearMessage ();
-		
-	} else if ( ! strcmp ( command, "/msg" ) ) {
-		
-		/* Typed: /msg (user) (message)
-		 
-		   Send: PRIVMSG (user) :(message) */
-		
-		
-		string recipient = strtok_r ( stringPosition, " \t", & remainingString );
-		
-		stringPosition = remainingString;
-		
-		
-		if ( ! recipient ) return;
-		
-		if ( ! remainingString ) return;
-		
-		
-		// Move the editor to the next line.
-		
-		printf ( "\n" );
-		
-		
-		sendPrivateMessageToRecipient ( remainingString, recipient );
-		
-		clearMessage ();
-		
-	} else {
-		
-		// If something like /... is typed, send everything after the /.
-		
-		// This lets people try command on their own.
-		
-		// Show the message.
-		
-		// addTextToScreen ( message );
-		
-		printf ( "\n" );
-		
-		
-		// Send the message.
-		
-		putMessageInOutbox ( ( message + 1 ) );
-		
-		
-		// We don't need the message anymore.
-		
-		clearMessage ();
-		
-	}
-	
-}
-
-
-void sendPrivateMessageToRecipient ( string newMessage, string recipient ) {
-	
-	//addTextToScreen ( message );
-	
-	
-	// Send the message.
-	
-	// Send: PRIVMSG (channel) :(message)
-	
-	char privateMessage [ 256 ];
-	
-	memset ( privateMessage, '\0', 256 );
-	
-	
-	appendStringToStringToLimit ( "PRIVMSG ", privateMessage, 255 );
-	
-	appendStringToStringToLimit ( recipient, privateMessage, 255 );
-	
-	appendStringToStringToLimit ( " :", privateMessage, 255 );
-	
-	appendStringToStringToLimit ( newMessage, privateMessage, 255 );
-	
-	
-	putMessageInOutbox ( privateMessage );
 	
 }
 
@@ -356,23 +222,8 @@ void clearMessage ( void ) {
 }
 
 
-void joinChannel ( string channel ) {
-	
-	char joinMessage [ 256 ];
-	
-	memset ( joinMessage, '\0', 256 );
-	
-	appendStringToStringToLimit ( "JOIN ", joinMessage, 255 );
-	
-	appendStringToStringToLimit ( channel, joinMessage, 255 );
-	
-	putMessageInOutbox ( joinMessage );
-	
-}
+void addMessageToScreen ( void ) {
 
+	printf ( "\n" );
 
-void filterChannel ( string channel ) {
-	
-	currentChannel = channel;
-	
 }
